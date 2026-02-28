@@ -1,94 +1,19 @@
-#include <memory>
-
-template<typename T, bool Extendable = false, typename Allocator = std::allocator<T>>
-class circular_buffer {
-private:
-
-    Allocator alloc_;
-
-    T* data_=nullptr;
-    size_t capacity_{};
-    size_t size_{};
-
-    size_t write_ind_{};
-    size_t read_ind_{};
-
-    class iterator{
-        circular_buffer* buffer_;
-        T* ptr_;
-
-    };
-
-    class const_iterator{
-
-    }
-
-    void Extend();
-
-public:
-
-    using value_type = T;
-    using reference = T&;
-    using const_reference=const T&;
-    using size_type = size_t;
-    
-
-
-    circular_buffer(size_t capacity);
-
-    circular_buffer(std::initializer_list<T> elements);
-
-    circular_buffer(const circular_buffer& other);
-
-    circular_buffer(circular_buffer&& other);
-
-    size_t size(){ return size_; };
-
-    size_t max_size(){return capacity_;}
-
-    bool empty(){return size_==0};
-
-    void clear();
-
-    template<typename U>
-    void push_back(U&& element);
-
-    void pop_back();
-
-    template<typename U>
-    void push_front(U&& element);
-
-    void pop_front();
-
-    void insert();
-
-    void erase();
-
-    iterator begin(){return {};}
-    iterator end(){return {};}
-
-    const_iterator begin() const {return {};}
-    const_iterator end() const {return {};}
-
-    const_iterator cbegin() const {return {};}
-    const_iterator cend() const {return {};}
-
-};
+#include "circular_buffer_interface.hpp"
 
 template<typename T, bool Extendable, typename Allocator>
 void circular_buffer<T,Extendable, Allocator>::Extend(){
     if(capacity_==0){
-        data=std::allocator_traits::allocate(5);
+        data_=std::allocator_traits<Allocator>::allocate(alloc_, 5);
         capacity_=5;
     }
     else{
-        T* new_data = std::allocator_traits::allocate(capacity_*2);
+        T* new_data = std::allocator_traits<Allocator>::allocate(alloc_, capacity_*2);
         auto it = begin();
         for(int i = 0; i < size_; i++){
             new_data[i]=std::move(*it);
             it++;
         }
-        std::allocator_traits::deallocate(alloc_, data_);
+        std::allocator_traits<Allocator>::deallocate(alloc_, data_, size_);
         data_=new_data;
         write_ind_=size_;
         read_ind_=0;
@@ -98,7 +23,7 @@ void circular_buffer<T,Extendable, Allocator>::Extend(){
 
 
 template<typename T, bool Extendable, typename Allocator>
-circular_buffer<T, Extendable, Allocator>::circular_buffer(size_t capacity){
+circular_buffer<T, Extendable, Allocator>::circular_buffer(size_type capacity){
     data_=std::allocator_traits<Allocator>::allocate(alloc_, capacity);
     capacity_=capacity;
 }
