@@ -3,6 +3,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include <cstdlib>
+
 class NodeTag {};
 
 class SomeObj {
@@ -54,11 +56,11 @@ public:
             ++TestAllocator<NodeTag>::AllocationCount;
             TestAllocator<NodeTag>::ElementsAllocated += sz;
         }
-        return reinterpret_cast<pointer>(new char[sz * sizeof(value_type)]);
+        return static_cast<pointer>(std::aligned_alloc(alignof(T), sizeof(T) * sz));
     }
 
-    void deallocate(pointer p, std::size_t n) {
-
+    void deallocate(pointer p, std::size_t) {
+        std::free(p);
     }
 
     bool operator==(const TestAllocator& other) const {
