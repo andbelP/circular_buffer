@@ -108,7 +108,7 @@ TYPED_TEST(CircularBufferIntTest, eraseSequence) {
 TYPED_TEST(CircularBufferIntTest, nValues) {
     TypeParam cb(5);
 
-    cb.assign(5, 10);
+    cb.assign(static_cast<size_t>(5), 10);
 
     ASSERT_THAT(cb, testing::ElementsAre(10, 10, 10, 10, 10));
 }
