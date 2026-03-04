@@ -56,11 +56,11 @@ public:
             ++TestAllocator<NodeTag>::AllocationCount;
             TestAllocator<NodeTag>::ElementsAllocated += sz;
         }
-        return static_cast<pointer>(_aligned_malloc(sz * sizeof(T), alignof(T)));
+        return static_cast<pointer>(std::aligned_alloc(sz * sizeof(T), alignof(T)));
     }
 
     void deallocate(pointer p, std::size_t) {
-        _aligned_free(p);
+        std::free(p);
     }
 
     bool operator==(const TestAllocator& other) const {
