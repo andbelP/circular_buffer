@@ -56,7 +56,7 @@ public:
             ++TestAllocator<NodeTag>::AllocationCount;
             TestAllocator<NodeTag>::ElementsAllocated += sz;
         }
-        return static_cast<pointer>(std::aligned_alloc(sz * sizeof(T), alignof(T)));
+        return static_cast<pointer>(std::aligned_alloc(alignof(T), sizeof(T) * sz));
     }
 
     void deallocate(pointer p, std::size_t) {
