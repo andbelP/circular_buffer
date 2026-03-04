@@ -37,6 +37,8 @@ class circular_buffer {
    public:
     circular_buffer() = default;
 
+    ~circular_buffer();
+
     circular_buffer(Allocator&& alloc) : alloc_(std::move(alloc)) {}
 
     circular_buffer(const Allocator& alloc) : alloc_(alloc) {}

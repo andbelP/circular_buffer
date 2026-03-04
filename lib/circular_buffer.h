@@ -595,3 +595,11 @@ void circular_buffer<T, Extendable, Allocator>::resize(size_type n,
     size_ = n;
     end_ = (start_ + size_) % capacity_;
 }
+
+template <typename T, bool Extendable, typename Allocator>
+circular_buffer<T, Extendable, Allocator>::~circular_buffer(){
+    for(auto it = begin(); it!=end(); it++){
+        std::allocator_traits<Allocator>::destroy(alloc_, &(*it));
+    }
+    std::allocator_traits<Allocator>::deallocate(alloc_, data_, capacity_);
+}
