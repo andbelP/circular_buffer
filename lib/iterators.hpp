@@ -1,9 +1,9 @@
 template <typename T, bool Extendable, typename Allocator>
 class circular_buffer;
 
-#define CntnrIterator ContainerIterator<T, Extendable, Allocator, isConst>
+#define CntnrIterator ContainerIterator<T, Extendable, Allocator, IsConst>
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 class ContainerIterator {
     template <typename, bool, typename, bool>
     friend class ContainerIterator;
@@ -121,37 +121,37 @@ class ReverseIterator {
     }
 };
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 bool CntnrIterator::operator==(const ContainerIterator& other) const {
     return (buffer_ == other.buffer_ && index_ == other.index_);
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 bool CntnrIterator::operator!=(const ContainerIterator& other) const {
     return !(*this == other);
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 bool CntnrIterator::operator>=(const ContainerIterator& other) const {
     return (buffer_ == other.buffer_ && index_ >= other.index_);
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 bool CntnrIterator::operator<=(const ContainerIterator& other) const {
     return !(*this >= other) || *this == other;
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 bool CntnrIterator::operator<(const ContainerIterator& other) const {
     return !(*this >= other);
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 bool CntnrIterator::operator>(const ContainerIterator& other) const {
     return !(*this <= other);
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 CntnrIterator CntnrIterator::operator+(difference_type n) const {
     ContainerIterator result;
     result.buffer_ = buffer_;
@@ -159,33 +159,33 @@ CntnrIterator CntnrIterator::operator+(difference_type n) const {
     return result;
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 CntnrIterator& CntnrIterator::operator++() {
     index_++;
     return *this;
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 CntnrIterator CntnrIterator::operator++(int) {
     ContainerIterator result = *this;
     index_ = index_ + 1;
     return result;
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 CntnrIterator& CntnrIterator::operator--() {
     index_--;
     return *this;
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 CntnrIterator CntnrIterator::operator--(int) {
     ContainerIterator result = *this;
     index_ = index_ - 1;
     return result;
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 CntnrIterator CntnrIterator::operator-(difference_type n) const {
     ContainerIterator result;
     result.index_ = index_ - n;
@@ -193,19 +193,19 @@ CntnrIterator CntnrIterator::operator-(difference_type n) const {
     return result;
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 auto CntnrIterator::operator-(
     const ContainerIterator<T, Extendable, Allocator, true>& other) const
     -> difference_type {
     return index_ - other.index_;
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 auto CntnrIterator::operator[](size_type ind) const -> reference {
     return *(*this + ind);
 }
 
-template <typename T, bool Extendable, typename Allocator, bool isConst>
+template <typename T, bool Extendable, typename Allocator, bool IsConst>
 auto CntnrIterator::operator*() const -> reference {
     size_type real_ind = (buffer_->start_ + index_) % buffer_->capacity_;
     return ((buffer_->data_)[real_ind]);
