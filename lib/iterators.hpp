@@ -5,10 +5,10 @@ class circular_buffer;
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
 class ContainerIterator {
-    template<typename, bool, typename, bool>
+    template <typename, bool, typename, bool>
     friend class ContainerIterator;
 
-    friend circular_buffer<T,Extendable,Allocator>;
+    friend circular_buffer<T, Extendable, Allocator>;
 
    public:
     using iterator_category = std::random_access_iterator_tag;
@@ -30,9 +30,12 @@ class ContainerIterator {
 
    public:
     ContainerIterator() = default;
-    ContainerIterator(buffer_type* buffer, size_type index) : buffer_(buffer), index_(index){}
+    ContainerIterator(buffer_type* buffer, size_type index)
+        : buffer_(buffer), index_(index) {}
 
-    ContainerIterator(const ContainerIterator<T, Extendable, Allocator, false>& other): buffer_(other.buffer_), index_(other.index_){};
+    ContainerIterator(
+        const ContainerIterator<T, Extendable, Allocator, false>& other)
+        : buffer_(other.buffer_), index_(other.index_) {};
 
     bool operator==(const ContainerIterator& other) const;
     bool operator!=(const ContainerIterator& other) const;
@@ -48,156 +51,162 @@ class ContainerIterator {
     ContainerIterator operator--(int);
 
     ContainerIterator operator-(difference_type n) const;
-    difference_type operator-(const ContainerIterator<T,Extendable, Allocator, true>& other) const;
+    difference_type operator-(
+        const ContainerIterator<T, Extendable, Allocator, true>& other) const;
     reference operator[](size_type ind) const;
     reference operator*() const;
 };
 
 template <typename Iterator>
-class ReverseIterator{
+class ReverseIterator {
     Iterator it_{};
-public:
+
+   public:
     using iterator_category = Iterator::iterator_category;
     using reference = Iterator::reference;
     using pointer = Iterator::pointer;
     using value_type = Iterator::value_type;
     using difference_type = Iterator::difference_type;
     using size_type = Iterator::size_type;
-    ReverseIterator()=default;
-    ReverseIterator(Iterator it):it_(it){}
-    ReverseIterator& operator++(){
+    ReverseIterator() = default;
+    ReverseIterator(Iterator it) : it_(it) {}
+    ReverseIterator& operator++() {
         --it_;
         return *this;
     }
-    ReverseIterator operator++(int){
+    ReverseIterator operator++(int) {
         auto to_ret = *this;
         it_--;
         return to_ret;
     }
-    ReverseIterator& operator--(){
+    ReverseIterator& operator--() {
         ++it_;
         return *this;
     }
-    ReverseIterator operator--(int){
+    ReverseIterator operator--(int) {
         auto to_ret = *this;
         it_++;
         return to_ret;
     }
 
-    ReverseIterator operator+(typename Iterator::difference_type n) const{
-        ReverseIterator result=*this;
-        result.it_=result.it_-n;
+    ReverseIterator operator+(typename Iterator::difference_type n) const {
+        ReverseIterator result = *this;
+        result.it_ = result.it_ - n;
         return result;
     }
 
-    ReverseIterator operator-(typename Iterator::difference_type n) const{
-        ReverseIterator result=*this;
-        result.it_=result.it_+n;
+    ReverseIterator operator-(typename Iterator::difference_type n) const {
+        ReverseIterator result = *this;
+        result.it_ = result.it_ + n;
         return result;
     }
-    decltype(auto) operator*() const{
+    difference_type operator-(const ReverseIterator& other) const {
+        return other.it_ - it_;
+    }
+    decltype(auto) operator*() const {
         auto tmp = it_;
         --tmp;
         return *tmp;
     }
 
-    decltype(auto) operator[](typename Iterator::difference_type ind) const{
+    decltype(auto) operator[](typename Iterator::difference_type ind) const {
         return *(*this + ind);
     }
 
-    bool operator==(const ReverseIterator other) const{
-        return other.it_==it_;
+    bool operator==(const ReverseIterator other) const {
+        return other.it_ == it_;
     }
-    bool operator!=(const ReverseIterator other) const{
-        return !(other.it_==it_);
+    bool operator!=(const ReverseIterator other) const {
+        return !(other.it_ == it_);
     }
 };
 
-
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-bool CntnrIterator::operator==(const ContainerIterator& other) const{
-    return (buffer_==other.buffer_ && index_==other.index_);
+bool CntnrIterator::operator==(const ContainerIterator& other) const {
+    return (buffer_ == other.buffer_ && index_ == other.index_);
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-bool CntnrIterator::operator!=(const ContainerIterator& other) const{
-    return !(*this==other);
+bool CntnrIterator::operator!=(const ContainerIterator& other) const {
+    return !(*this == other);
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-bool CntnrIterator::operator>=(const ContainerIterator& other) const{
-    return (buffer_==other.buffer_ && index_>=other.index_);
+bool CntnrIterator::operator>=(const ContainerIterator& other) const {
+    return (buffer_ == other.buffer_ && index_ >= other.index_);
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-bool CntnrIterator::operator<=(const ContainerIterator& other) const{
-    return !(*this>=other) || *this==other;
+bool CntnrIterator::operator<=(const ContainerIterator& other) const {
+    return !(*this >= other) || *this == other;
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-bool CntnrIterator::operator<(const ContainerIterator& other) const{
-    return !(*this>=other);
+bool CntnrIterator::operator<(const ContainerIterator& other) const {
+    return !(*this >= other);
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-bool CntnrIterator::operator>(const ContainerIterator& other) const{
-    return !(*this<=other);
+bool CntnrIterator::operator>(const ContainerIterator& other) const {
+    return !(*this <= other);
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-CntnrIterator CntnrIterator::operator+(difference_type n) const{
+CntnrIterator CntnrIterator::operator+(difference_type n) const {
     ContainerIterator result;
-    result.buffer_=buffer_;
-    result.index_=index_+n;
+    result.buffer_ = buffer_;
+    result.index_ = index_ + n;
     return result;
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-CntnrIterator& CntnrIterator::operator++(){
+CntnrIterator& CntnrIterator::operator++() {
     index_++;
     return *this;
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-CntnrIterator CntnrIterator::operator++(int){
-    ContainerIterator result=*this;
-    index_=index_+1;
+CntnrIterator CntnrIterator::operator++(int) {
+    ContainerIterator result = *this;
+    index_ = index_ + 1;
     return result;
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-CntnrIterator& CntnrIterator::operator--(){
+CntnrIterator& CntnrIterator::operator--() {
     index_--;
     return *this;
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-CntnrIterator CntnrIterator::operator--(int){
-    ContainerIterator result=*this;
-    index_=index_-1;
+CntnrIterator CntnrIterator::operator--(int) {
+    ContainerIterator result = *this;
+    index_ = index_ - 1;
     return result;
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-CntnrIterator CntnrIterator::operator-(difference_type n) const{
+CntnrIterator CntnrIterator::operator-(difference_type n) const {
     ContainerIterator result;
-    result.index_=index_-n;
-    result.buffer_=buffer_;
+    result.index_ = index_ - n;
+    result.buffer_ = buffer_;
     return result;
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-auto CntnrIterator::operator-(const ContainerIterator<T,Extendable, Allocator, true>& other) const -> difference_type{
-    return index_-other.index_;
+auto CntnrIterator::operator-(
+    const ContainerIterator<T, Extendable, Allocator, true>& other) const
+    -> difference_type {
+    return index_ - other.index_;
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-auto CntnrIterator::operator[](size_type ind) const -> reference{
+auto CntnrIterator::operator[](size_type ind) const -> reference {
     return *(*this + ind);
 }
 
 template <typename T, bool Extendable, typename Allocator, bool isConst>
-auto CntnrIterator::operator*() const -> reference{
-    size_type real_ind = (buffer_->start_+index_) % buffer_->capacity_;
+auto CntnrIterator::operator*() const -> reference {
+    size_type real_ind = (buffer_->start_ + index_) % buffer_->capacity_;
     return ((buffer_->data_)[real_ind]);
 }
