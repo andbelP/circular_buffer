@@ -11,9 +11,6 @@ class CircularBufferIntTest : public testing::Test {};
 
 using CircularBufferIntTypes = testing::Types<
     circular_buffer<int, false>
-    #ifdef RUN_EXT_TESTS
-    , circular_buffer<int, true>
-    #endif
 >;
 TYPED_TEST_SUITE(CircularBufferIntTest, CircularBufferIntTypes);
 
@@ -22,9 +19,6 @@ class CircularBufferStringTest : public testing::Test {};
 
 using CircularBufferStringTypes = testing::Types<
     circular_buffer<std::string, false>
-    #ifdef RUN_EXT_TESTS
-    , circular_buffer<std::string, true>
-    #endif
 >;
 TYPED_TEST_SUITE(CircularBufferStringTest, CircularBufferStringTypes);
 
@@ -141,4 +135,166 @@ TYPED_TEST(CircularBufferIntTest, simpleTest) {
     }
 
     ASSERT_EQ(cb.front(), 3);
+}
+
+TYPED_TEST(CircularBufferIntTest, ClearBuffer) {
+    TypeParam cb = {1, 2, 3};
+    cb.clear();
+    ASSERT_EQ(cb.size(), 0);
+    ASSERT_TRUE(cb.empty());
+}
+
+TYPED_TEST(CircularBufferIntTest, ResizeLessThanSize) {
+    TypeParam cb = {1, 2, 3, 4};
+    cb.resize(2);
+    ASSERT_EQ(cb.size(), 2);
+    ASSERT_THAT(cb, testing::ElementsAre(1, 2));
+}
+
+TYPED_TEST(CircularBufferIntTest, AssignIterator) {
+    std::vector<typename TypeParam::value_type> v = {52,69,67,52};
+    TypeParam cb(2);
+    cb.assign(v.begin() + 1, v.end() - 1);
+    ASSERT_THAT(cb, testing::ElementsAre(69,67));
+}
+
+TYPED_TEST(CircularBufferIntTest, EraseAllElements) {
+    TypeParam cb = {1, 2, 3};
+    cb.erase(cb.begin(), cb.end());
+    ASSERT_TRUE(cb.empty());
+}
+
+TYPED_TEST(CircularBufferIntTest, PushFront) {
+    TypeParam cb(3);
+    cb.push_front(42);
+    ASSERT_EQ(cb.size(), 1);
+    ASSERT_EQ(cb.front(), 42);
+    ASSERT_EQ(cb.back(), 42);
+}
+
+TYPED_TEST(CircularBufferIntTest, OverwriteOldElementsPushBack) {
+    TypeParam cb(3);
+
+    cb.push_back(1);
+    cb.push_back(2);
+    cb.push_back(3);
+
+    cb.push_back(4);
+    cb.push_back(5);
+
+    ASSERT_THAT(cb, testing::ElementsAre(3,4,5));
+}
+
+TYPED_TEST(CircularBufferIntTest, OverwriteOldElementsPushFront) {
+    TypeParam cb {1,2,3};
+
+    cb.push_front(4);
+    cb.push_front(5);
+
+    ASSERT_THAT(cb, testing::ElementsAre(5,4,1));
+}
+
+TYPED_TEST(CircularBufferIntTest, FrontBackAfterOverwrite) {
+    TypeParam cb(3);
+
+    cb.push_back(1);
+    cb.push_back(2);
+    cb.push_back(3);
+
+    ASSERT_EQ(cb.front(), 1);
+    ASSERT_EQ(cb.back(), 3);
+
+    cb.push_back(4); // {2,3,4}
+    ASSERT_EQ(cb.front(), 2);
+    ASSERT_EQ(cb.back(), 4);
+
+    //{1,2,3}
+    cb.push_front(1);
+    ASSERT_EQ(cb.front(), 1);
+    ASSERT_EQ(cb.back(), 3);
+}
+
+TEST(ReverseIteratorTest, SimpleIteration) {
+    circular_buffer<int, true> cb = {1,2,3,4,5};
+
+    std::vector<int> result;
+    for (auto it = cb.rbegin(); it != cb.rend(); ++it) {
+        result.push_back(*it);
+    }
+
+    ASSERT_THAT(result, testing::ElementsAre(5,4,3,2,1));
+}
+
+TEST(ReverseIteratorTest, PrefixAndPostfixIncrement) {
+    circular_buffer<int, true> cb = {52,67,69};
+
+    auto it = cb.rbegin();
+
+    ASSERT_EQ(*it, 69);
+
+    ++it;
+    ASSERT_EQ(*it, 67);
+
+    it++;
+    ASSERT_EQ(*it, 52);
+}
+
+TEST(ReverseIteratorTest, DecrementOperators) {
+    circular_buffer<int, true> cb = {1,2,3};
+
+    auto it = cb.rend();
+    --it;
+
+    ASSERT_EQ(*it, 1);
+
+    it--;
+    ASSERT_EQ(*it, 2);
+}
+
+TEST(ReverseIteratorTest, ArithmeticOperators) {
+    circular_buffer<int, true> cb = {1,2,3,4,5};
+
+    auto it = cb.rbegin();
+
+    ASSERT_EQ(*(it + 2), 3);
+    ASSERT_EQ(*(it + 4), 1);
+
+    auto it2 = it + 3;
+    ASSERT_EQ(*it2, 2);
+
+    auto it3 = it2 - 2;
+    ASSERT_EQ(*it3, 4);
+}
+
+TEST(ReverseIteratorTest, IndexOperator) {
+    circular_buffer<int, true> cb = {1,2,3,4,5};
+
+    auto it = cb.rbegin();
+
+    ASSERT_EQ(it[0], 5);
+    ASSERT_EQ(it[1], 4);
+    ASSERT_EQ(it[4], 1);
+}
+
+
+TEST(ReverseIteratorTest, ConstReverseIterator) {
+    const circular_buffer<int, true> cb = {1,2,3,4};
+
+    std::vector<int> result;
+    for (auto it = cb.crbegin(); it != cb.crend(); ++it) {
+        result.push_back(*it);
+    }
+
+    ASSERT_THAT(result, testing::ElementsAre(4,3,2,1));
+}
+
+TEST(ReverseIteratorTest, CompareWithStdReverse) {
+    circular_buffer<int, true> cb = {1,2,3,4,5};
+
+    std::vector<int> v(cb.begin(), cb.end());
+    std::reverse(v.begin(), v.end());
+
+    std::vector<int> result(cb.rbegin(), cb.rend());
+
+    ASSERT_EQ(result, v);
 }

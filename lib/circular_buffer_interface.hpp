@@ -1,78 +1,40 @@
 #include <memory>
 
+#include "iterators.hpp"
+
 template<typename T, bool Extendable = false, typename Allocator = std::allocator<T>>
 class circular_buffer {
 
-    template<typename ValueType>
-    class ContainerIterator;
 
 public:
+    friend ContainerIterator<T,Extendable,Allocator, false>;
+    friend ContainerIterator<T,Extendable,Allocator, true>;
 
     using value_type = T;
     using reference = T&;
     using const_reference=const T&;
     using size_type = typename std::allocator_traits<Allocator>::size_type;
-    using iterator=ContainerIterator<T>;
-    using const_iterator=ContainerIterator<const T>;
-    using reverse_iterator=std::reverse_iterator<iterator>;
-    using const_reverse_iterator=std::reverse_iterator<const_iterator>;
+    using iterator=ContainerIterator<T,Extendable,Allocator,false>;
+    using const_iterator=ContainerIterator<T,Extendable,Allocator, true>;
+    using reverse_iterator=ReverseIterator<iterator>;
+    using const_reverse_iterator=ReverseIterator<const_iterator>;
     using difference_type=std::allocator_traits<Allocator>::difference_type;
     using allocator_type=Allocator;
 
 private:
 
-    Allocator alloc_;
+    Allocator alloc_{};
 
     T* data_=nullptr;
-    size_t capacity_{};
-    size_t size_{};
+    size_type capacity_{};
+    size_type size_{};
 
-    size_t write_ind_{};
-    size_t read_ind_{};
-
-    template<typename ValueType>
-    class ContainerIterator{
-    public:
-        using iterator_category=std::random_access_iterator_tag;
-        using reference=reference;
-        using pointer = iterator*;
-        using value_type=value_type;
-        using difference_type=difference_type;
-        
-    private:
-        circular_buffer* buffer_;
-        ValueType* ptr_;
-
-    public:
-
-        ContainerIterator()=default;
-
-        operator const_iterator() const {
-            return const_iterator{};
-        }
-
-        bool operator==(const ContainerIterator& other) const;
-        bool operator!=(const ContainerIterator& other) const;
-        bool operator>=(const ContainerIterator& other) const;
-        bool operator<=(const ContainerIterator& other) const;
-        bool operator>(const ContainerIterator& other) const;
-        bool operator<(const ContainerIterator& other) const;
-        iterator operator+(difference_type n) const;
-
-        iterator& operator++();
-        iterator operator++(int);
-        iterator& operator--();
-        iterator operator--(int);
-
-        iterator operator-(difference_type n) const;
-        difference_type operator-(const ContainerIterator& other) const;
-        reference operator[](difference_type ind) const;
-        reference operator*() const;
-
-    };
-
+    size_type start_{};
+    size_type end_{};
 
     void Extend();
+
+    void ShiftRight(iterator from, size_type n);
 
 public:
 
@@ -80,9 +42,9 @@ public:
 
     circular_buffer(Allocator&& alloc) : alloc_(std::move(alloc)){}
 
-    circular_buffer(Allocator& alloc) : alloc_(alloc){}
+    circular_buffer(const Allocator& alloc) : alloc_(alloc){}
 
-    circular_buffer(circular_buffer&& other, Allocator alloc) : alloc_(alloc){}
+    circular_buffer(circular_buffer&& other, const Allocator& alloc);
 
     circular_buffer(size_type capacity);
 
@@ -96,9 +58,9 @@ public:
 
     Allocator get_allocator() const;
 
-    size_t size() const{ return size_; };
+    size_type size() const{ return size_; };
 
-    size_t max_size() const{return capacity_;}
+    size_type max_size() const{return capacity_;}
 
     bool empty() const{return size_==0;};
 
@@ -109,6 +71,7 @@ public:
 
     reference front();
     reference back();
+
 
     template<typename U>
     void push_back(U&& element);
@@ -122,8 +85,8 @@ public:
 
     iterator insert(const_iterator iter, const value_type& val);
 
-    template<typename TIterator>
-    iterator insert(const_iterator iter, TIterator from, TIterator to);
+    template<typename ForwardIterator, bool isIterator= std::is_base_of<std::forward_iterator_tag, typename std::iterator_traits<ForwardIterator>::iterator_category>::value>
+    iterator insert(const_iterator iter, ForwardIterator from, ForwardIterator to);
 
     iterator insert(const_iterator iter, size_type cnt, const value_type& val);
     iterator insert(const_iterator iter, std::initializer_list<T> elements);
@@ -134,8 +97,8 @@ public:
     void assign(size_type n, const T& value);
     void assign(std::initializer_list<T> values);
 
-    template<typename TIterator>
-    void assign(TIterator from, TIterator to);
+    template<typename ForwardIterator, bool isIterator= std::is_base_of<std::forward_iterator_tag, typename std::iterator_traits<ForwardIterator>::iterator_category>::value>
+    void assign(ForwardIterator from, ForwardIterator to);
 
     void resize(size_type n);
     void resize(size_type n, const T& val);

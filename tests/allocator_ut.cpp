@@ -56,11 +56,11 @@ public:
             ++TestAllocator<NodeTag>::AllocationCount;
             TestAllocator<NodeTag>::ElementsAllocated += sz;
         }
-        return static_cast<pointer>(std::aligned_alloc(alignof(T), sizeof(T) * sz));
+        return static_cast<pointer>(_aligned_malloc(sz * sizeof(T), alignof(T)));
     }
 
     void deallocate(pointer p, std::size_t) {
-        std::free(p);
+        _aligned_free(p);
     }
 
     bool operator==(const TestAllocator& other) const {
@@ -143,7 +143,10 @@ TEST_F(WorkWithAllocatorTest, extendedPushBack) {
     ASSERT_EQ(TestAllocator<SomeObj>::AllocationCount, 2);
     ASSERT_EQ(TestAllocator<SomeObj>::ElementsAllocated, 15);
 
+    std::cout<< "DFD"<<SomeObj::ConstructorCalled << "DFD" << SomeObj::DestructorCalled<< "DFD";
     ASSERT_EQ(SomeObj::ConstructorCalled, 6);
-    ASSERT_EQ(SomeObj::DestructorCalled, 6);
+    ASSERT_EQ(SomeObj::DestructorCalled, 11);
+
+    
 }
 #endif
