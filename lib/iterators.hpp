@@ -12,8 +12,8 @@ class ContainerIterator {
 
    public:
     using iterator_category = std::random_access_iterator_tag;
-    using reference = std::conditional<isConst, const T&, T&>::type;
-    using pointer = std::conditional<isConst, const T*, T*>::type;
+    using reference = std::conditional<IsConst, const T&, T&>::type;
+    using pointer = std::conditional<IsConst, const T*, T*>::type;
     using value_type = T;
     using difference_type =
         typename circular_buffer<T, Extendable, Allocator>::difference_type;
@@ -22,7 +22,7 @@ class ContainerIterator {
 
    private:
     using buffer_type =
-        std::conditional<isConst,
+        std::conditional<IsConst,
                          const circular_buffer<T, Extendable, Allocator>,
                          circular_buffer<T, Extendable, Allocator>>::type;
     buffer_type* buffer_;
