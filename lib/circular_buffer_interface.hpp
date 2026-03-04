@@ -84,7 +84,7 @@ class circular_buffer {
     iterator insert(const_iterator iter, const value_type& val);
 
     template <typename ForwardIterator,
-              bool isIterator = std::is_base_of<
+              bool IsIterator = std::is_base_of<
                   std::forward_iterator_tag,
                   typename std::iterator_traits<
                       ForwardIterator>::iterator_category>::value>
@@ -101,7 +101,7 @@ class circular_buffer {
     void assign(std::initializer_list<T> values);
 
     template <typename ForwardIterator,
-              bool isIterator = std::is_base_of<
+              bool IsIterator = std::is_base_of<
                   std::forward_iterator_tag,
                   typename std::iterator_traits<
                       ForwardIterator>::iterator_category>::value>
