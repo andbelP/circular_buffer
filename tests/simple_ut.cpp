@@ -298,3 +298,21 @@ TEST(ReverseIteratorTest, CompareWithStdReverse) {
 
     ASSERT_EQ(result, v);
 }
+
+
+TEST(CopyContainerTest, CopyConstructor) {
+    circular_buffer<int, true> cb = {1,2,3,4,5};
+
+    auto other = cb;
+    ASSERT_THAT(other, testing::ElementsAre(1,2,3,4,5));
+    
+}
+
+TEST(CopyContainerTest, MoveConstructor) {
+    circular_buffer<int, true> cb = {1,2,3,4,5};
+
+    auto other = std::move(cb);
+    ASSERT_THAT(other, testing::ElementsAre(1,2,3,4,5));
+    ASSERT_EQ(cb.size(), 0);
+    
+}
