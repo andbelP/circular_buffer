@@ -64,42 +64,22 @@ template <typename T, bool Extendable, typename Allocator>
 circular_buffer<T, Extendable, Allocator>::circular_buffer(
     circular_buffer&& other)
     : alloc_(std::move(other.alloc_)) {
-    if (other.alloc_ == alloc_) {
-        data_ = other.data_;
-        capacity_ = other.capacity_;
-        size_ = other.size_;
-        start_ = other.start_;
-        end_ = other.end_;
+    data_ = other.data_;
+    capacity_ = other.capacity_;
+    size_ = other.size_;
+    start_ = other.start_;
+    end_ = other.end_;
 
-        other.data_ = other.size_ = other.capacity_ = other.start_ =
-            other.end_ = 0;
-
-    } else {
-        data_ =
-            std::allocator_traits<Allocator>::allocate(alloc_, other.capacity_);
-        for (auto it = other.begin(); it != other.end(); it++) {
-            std::allocator_traits<Allocator>::construct(alloc_, data_ + end_,
-                                                        std::move(*it));
-            end_++;
-        }
-        size_ = other.size_;
-        capacity_ = other.capacity_;
-
-        for (auto it = other.begin(); it != other.end(); it++) {
-            std::allocator_traits<Allocator>::destroy(other.alloc_, &(*it));
-        }
-        std::allocator_traits<Allocator>::deallocate(other.alloc_, other.data_,
-                                                     other.capacity_);
-        other.data_ = other.size_ = other.capacity_ = other.start_ =
-            other.end_ = 0;
-    }
+    other.data_ = nullptr;
+    other.size_ = other.capacity_ = other.start_ =
+        other.end_ = 0;
 }
 
 template <typename T, bool Extendable, typename Allocator>
 circular_buffer<T, Extendable, Allocator>::circular_buffer(
     circular_buffer&& other, const Allocator& alloc)
     : alloc_(alloc) {
-    if (other.alloc_ == alloc_) {
+    if (other.alloc_ == alloc) {
         data_ = other.data_;
         capacity_ = other.capacity_;
         size_ = other.size_;
@@ -119,14 +99,6 @@ circular_buffer<T, Extendable, Allocator>::circular_buffer(
         }
         size_ = other.size_;
         capacity_ = other.capacity_;
-
-        for (auto it = other.begin(); it != other.end(); it++) {
-            std::allocator_traits<Allocator>::destroy(other.alloc_, &(*it));
-        }
-        std::allocator_traits<Allocator>::deallocate(other.alloc_, other.data_,
-                                                     other.capacity_);
-        other.data_ = nullptr;
-        other.size_ = other.capacity_ = other.start_ = other.end_ = 0;
     }
 }
 
