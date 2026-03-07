@@ -1,7 +1,6 @@
 #include <circular_buffer.h>
-
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <string>
 #include <vector>
@@ -9,17 +8,14 @@
 template <typename T>
 class CircularBufferIntTest : public testing::Test {};
 
-using CircularBufferIntTypes = testing::Types<
-    circular_buffer<int, false>
->;
+using CircularBufferIntTypes = testing::Types<circular_buffer<int, false>>;
 TYPED_TEST_SUITE(CircularBufferIntTest, CircularBufferIntTypes);
 
 template <typename T>
 class CircularBufferStringTest : public testing::Test {};
 
-using CircularBufferStringTypes = testing::Types<
-    circular_buffer<std::string, false>
->;
+using CircularBufferStringTypes =
+    testing::Types<circular_buffer<std::string, false>>;
 TYPED_TEST_SUITE(CircularBufferStringTest, CircularBufferStringTypes);
 
 TYPED_TEST(CircularBufferIntTest, alternatingPush) {
@@ -67,12 +63,14 @@ TYPED_TEST(CircularBufferIntTest, popFromEmpty) {
     try {
         cb.pop_back();
         FAIL();
-    } catch (...) {}
+    } catch (...) {
+    }
 
     try {
         cb.pop_front();
         FAIL();
-    } catch (...) {}
+    } catch (...) {
+    }
 
     SUCCEED();
 }
@@ -125,7 +123,7 @@ TYPED_TEST(CircularBufferIntTest, initializerList) {
 }
 
 TYPED_TEST(CircularBufferIntTest, simpleTest) {
-    TypeParam cb(5); // {3, 1, 0, 2, 4}
+    TypeParam cb(5);  // {3, 1, 0, 2, 4}
     for (int i = 0; i < 5; ++i) {
         if (i % 2 == 0) {
             cb.push_back(i);
@@ -152,10 +150,10 @@ TYPED_TEST(CircularBufferIntTest, ResizeLessThanSize) {
 }
 
 TYPED_TEST(CircularBufferIntTest, AssignIterator) {
-    std::vector<typename TypeParam::value_type> v = {52,69,67,52};
+    std::vector<typename TypeParam::value_type> v = {52, 69, 67, 52};
     TypeParam cb(2);
     cb.assign(v.begin() + 1, v.end() - 1);
-    ASSERT_THAT(cb, testing::ElementsAre(69,67));
+    ASSERT_THAT(cb, testing::ElementsAre(69, 67));
 }
 
 TYPED_TEST(CircularBufferIntTest, EraseAllElements) {
@@ -172,6 +170,14 @@ TYPED_TEST(CircularBufferIntTest, PushFront) {
     ASSERT_EQ(cb.back(), 42);
 }
 
+TYPED_TEST(CircularBufferIntTest, PushFrontOverwrite) {
+    TypeParam cb{1, 2, 3};
+    cb.push_front(0);
+    cb.push_front(-1);
+    cb.push_front(-2);
+    ASSERT_THAT(cb, testing::ElementsAre(-2, -1, 0));
+}
+
 TYPED_TEST(CircularBufferIntTest, OverwriteOldElementsPushBack) {
     TypeParam cb(3);
 
@@ -182,16 +188,16 @@ TYPED_TEST(CircularBufferIntTest, OverwriteOldElementsPushBack) {
     cb.push_back(4);
     cb.push_back(5);
 
-    ASSERT_THAT(cb, testing::ElementsAre(3,4,5));
+    ASSERT_THAT(cb, testing::ElementsAre(3, 4, 5));
 }
 
 TYPED_TEST(CircularBufferIntTest, OverwriteOldElementsPushFront) {
-    TypeParam cb {1,2,3};
+    TypeParam cb{1, 2, 3};
 
     cb.push_front(4);
     cb.push_front(5);
 
-    ASSERT_THAT(cb, testing::ElementsAre(5,4,1));
+    ASSERT_THAT(cb, testing::ElementsAre(5, 4, 1));
 }
 
 TYPED_TEST(CircularBufferIntTest, FrontBackAfterOverwrite) {
@@ -204,7 +210,7 @@ TYPED_TEST(CircularBufferIntTest, FrontBackAfterOverwrite) {
     ASSERT_EQ(cb.front(), 1);
     ASSERT_EQ(cb.back(), 3);
 
-    cb.push_back(4); // {2,3,4}
+    cb.push_back(4);  // {2,3,4}
     ASSERT_EQ(cb.front(), 2);
     ASSERT_EQ(cb.back(), 4);
 
@@ -215,18 +221,18 @@ TYPED_TEST(CircularBufferIntTest, FrontBackAfterOverwrite) {
 }
 
 TEST(ReverseIteratorTest, SimpleIteration) {
-    circular_buffer<int, true> cb = {1,2,3,4,5};
+    circular_buffer<int, true> cb = {1, 2, 3, 4, 5};
 
     std::vector<int> result;
     for (auto it = cb.rbegin(); it != cb.rend(); ++it) {
         result.push_back(*it);
     }
 
-    ASSERT_THAT(result, testing::ElementsAre(5,4,3,2,1));
+    ASSERT_THAT(result, testing::ElementsAre(5, 4, 3, 2, 1));
 }
 
 TEST(ReverseIteratorTest, PrefixAndPostfixIncrement) {
-    circular_buffer<int, true> cb = {52,67,69};
+    circular_buffer<int, true> cb = {52, 67, 69};
 
     auto it = cb.rbegin();
 
@@ -240,7 +246,7 @@ TEST(ReverseIteratorTest, PrefixAndPostfixIncrement) {
 }
 
 TEST(ReverseIteratorTest, DecrementOperators) {
-    circular_buffer<int, true> cb = {1,2,3};
+    circular_buffer<int, true> cb = {1, 2, 3};
 
     auto it = cb.rend();
     --it;
@@ -252,7 +258,7 @@ TEST(ReverseIteratorTest, DecrementOperators) {
 }
 
 TEST(ReverseIteratorTest, ArithmeticOperators) {
-    circular_buffer<int, true> cb = {1,2,3,4,5};
+    circular_buffer<int, true> cb = {1, 2, 3, 4, 5};
 
     auto it = cb.rbegin();
 
@@ -267,7 +273,7 @@ TEST(ReverseIteratorTest, ArithmeticOperators) {
 }
 
 TEST(ReverseIteratorTest, IndexOperator) {
-    circular_buffer<int, true> cb = {1,2,3,4,5};
+    circular_buffer<int, true> cb = {1, 2, 3, 4, 5};
 
     auto it = cb.rbegin();
 
@@ -276,20 +282,19 @@ TEST(ReverseIteratorTest, IndexOperator) {
     ASSERT_EQ(it[4], 1);
 }
 
-
 TEST(ReverseIteratorTest, ConstReverseIterator) {
-    const circular_buffer<int, true> cb = {1,2,3,4};
+    const circular_buffer<int, true> cb = {1, 2, 3, 4};
 
     std::vector<int> result;
     for (auto it = cb.crbegin(); it != cb.crend(); ++it) {
         result.push_back(*it);
     }
 
-    ASSERT_THAT(result, testing::ElementsAre(4,3,2,1));
+    ASSERT_THAT(result, testing::ElementsAre(4, 3, 2, 1));
 }
 
 TEST(ReverseIteratorTest, CompareWithStdReverse) {
-    circular_buffer<int, true> cb = {1,2,3,4,5};
+    circular_buffer<int, true> cb = {1, 2, 3, 4, 5};
 
     std::vector<int> v(cb.begin(), cb.end());
     std::reverse(v.begin(), v.end());
@@ -299,20 +304,92 @@ TEST(ReverseIteratorTest, CompareWithStdReverse) {
     ASSERT_EQ(result, v);
 }
 
-
 TEST(CopyContainerTest, CopyConstructor) {
-    circular_buffer<int, true> cb = {1,2,3,4,5};
+    circular_buffer<int, true> cb = {1, 2, 3, 4, 5};
 
     auto other = cb;
-    ASSERT_THAT(other, testing::ElementsAre(1,2,3,4,5));
-    
+    ASSERT_THAT(other, testing::ElementsAre(1, 2, 3, 4, 5));
 }
 
 TEST(CopyContainerTest, MoveConstructor) {
-    circular_buffer<int, true> cb = {1,2,3,4,5};
+    circular_buffer<int, true> cb = {1, 2, 3, 4, 5};
 
     auto other = std::move(cb);
-    ASSERT_THAT(other, testing::ElementsAre(1,2,3,4,5));
+    ASSERT_THAT(other, testing::ElementsAre(1, 2, 3, 4, 5));
     ASSERT_EQ(cb.size(), 0);
-    
+}
+
+TEST(CircularBufferTest, InsertionToUnextendableManyCases) {
+    std::vector<int> v = {30, 31, 32, 33, 34};
+    std::vector<std::vector<int>> ans = {
+        {1, 2, 3, 4}, {32, 2, 3, 4}, {31, 32, 3, 4}};
+
+    for (int i = 0; i < 3; i++) {
+        circular_buffer<int> buff = {1, 2, 3, 4};
+        buff.insert(buff.begin() + i, v.begin(), v.begin() + 3);
+        ASSERT_THAT(buff, testing::ElementsAreArray(ans[i]));
+    }
+}
+
+TYPED_TEST(CircularBufferIntTest, InsertFitsWithoutOverwrite) {
+    TypeParam cb(5);
+    cb.push_back(1);
+    cb.push_back(2);
+    cb.push_back(3);
+
+    cb.insert(cb.begin() + 1, {4, 5});
+
+    ASSERT_THAT(cb, testing::ElementsAre(1, 4, 5, 2, 3));
+}
+
+TYPED_TEST(CircularBufferIntTest, InsertOverwrite) {
+    TypeParam cb(5);
+    cb.push_back(1);
+    cb.push_back(2);
+    cb.push_back(3);
+    cb.push_back(4);
+    cb.push_back(5);
+
+    cb.insert(cb.begin() + 1, {6, 7, 8});
+
+    ASSERT_EQ(cb.size(), 5);
+    ASSERT_THAT(cb, testing::ElementsAre(8, 2, 3, 4, 5));
+}
+
+TYPED_TEST(CircularBufferIntTest, InsertAtBeginningOverwrite) {
+    TypeParam cb = {1, 2, 3, 4, 5};
+    cb.insert(cb.begin(), {6, 7, 8});
+    ASSERT_THAT(cb, testing::ElementsAre(1, 2, 3, 4, 5));
+}
+
+TYPED_TEST(CircularBufferIntTest, InsertAtEndOverwrite) {
+    TypeParam cb = {1, 2, 3, 4, 5};
+    cb.insert(cb.end(), {6, 7});
+
+    ASSERT_EQ(cb.size(), 5);
+    ASSERT_THAT(cb, testing::ElementsAre(3, 4, 5, 6, 7));
+}
+
+TYPED_TEST(CircularBufferIntTest, InsertSingleElementOverwrite) {
+    TypeParam cb = {1, 2, 3, 4, 5};
+    cb.insert(cb.begin() + 2, 9);
+
+    ASSERT_EQ(cb.size(), 5);
+    ASSERT_THAT(cb, testing::ElementsAre(2, 9, 3, 4, 5));
+}
+
+TYPED_TEST(CircularBufferIntTest, InsertMultipleValsOverwrite) {
+    TypeParam cb = {1, 2, 3};
+    cb.insert(cb.begin(), 5, 7);
+
+    ASSERT_EQ(cb.size(), 3);
+    ASSERT_THAT(cb, testing::ElementsAre(1, 2, 3));
+}
+
+TYPED_TEST(CircularBufferIntTest, InsertIntoEmptyBuffer) {
+    TypeParam cb(3);
+    cb.insert(cb.begin(), {1, 2, 3, 4});
+
+    ASSERT_EQ(cb.size(), 3);
+    ASSERT_THAT(cb, testing::ElementsAre(2, 3, 4));
 }

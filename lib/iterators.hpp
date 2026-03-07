@@ -57,6 +57,48 @@ class ContainerIterator {
     reference operator*() const;
 };
 
+template <typename T, bool IsConst=false>
+class repeat_iterator {
+   public:
+    using iterator_category = std::forward_iterator_tag;
+    using reference = std::conditional<IsConst, const T&, T&>::type;
+    using pointer = std::conditional<IsConst, const T*, T*>::type;
+    using value_type = T;
+    using difference_type =
+        int64_t;
+    using size_type =
+        size_t;
+
+   private:
+    reference value_{};
+    size_type pos_{};
+
+   public:
+    repeat_iterator(reference value, size_type pos)
+        : value_(value), pos_(pos) {}
+
+    reference operator*() const { return value_; }
+
+    repeat_iterator& operator++() {
+        pos_++;
+        return *this;
+    }
+
+    repeat_iterator operator++(int) {
+        repeat_iterator tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+
+    friend bool operator==(const repeat_iterator& a, const repeat_iterator& b) {
+        return a.pos_ == b.pos_;
+    }
+
+    friend bool operator!=(const repeat_iterator& a, const repeat_iterator& b) {
+        return !(a == b);
+    }
+};
+
 template <typename Iterator>
 class ReverseIterator {
     Iterator it_{};

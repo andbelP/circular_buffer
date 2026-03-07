@@ -32,8 +32,6 @@ class circular_buffer {
 
     void Extend();
 
-    void ShiftRight(iterator from, size_type n);
-
    public:
     circular_buffer() = default;
 
@@ -134,4 +132,9 @@ class circular_buffer {
     circular_buffer& operator=(const circular_buffer& other);
     circular_buffer& operator=(circular_buffer&& other);
     circular_buffer& operator=(std::initializer_list<value_type> other);
+
+    reference operator[](size_type ind);
+    const_reference operator[](size_type ind) const;
 };
+
+// TODO: operators[]. 
