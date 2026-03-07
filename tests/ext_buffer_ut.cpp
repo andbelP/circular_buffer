@@ -1,7 +1,6 @@
 #include <circular_buffer.h>
-
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 TEST(ExtendableBufferTest, simpleTest) {
     circular_buffer<int, true> cb(5);
@@ -41,7 +40,7 @@ TEST(CircularBufferIntTest, shrink) {
 }
 
 TEST(CircularBufferIntTest, insertValue) {
-    circular_buffer<int, true> cb(5); // {3, 1, 0, 2, 4}
+    circular_buffer<int, true> cb(5);  // {3, 1, 0, 2, 4}
     for (int i = 0; i < 5; ++i) {
         if (i % 2 == 0) {
             cb.push_back(i);
@@ -55,7 +54,7 @@ TEST(CircularBufferIntTest, insertValue) {
 }
 
 TEST(CircularBufferIntTest, insertNValues) {
-    circular_buffer<int, true> cb(7); // {3, 1, 0, 2, 4}
+    circular_buffer<int, true> cb(7);  // {3, 1, 0, 2, 4}
     for (int i = 0; i < 5; ++i) {
         if (i % 2 == 0) {
             cb.push_back(i);
@@ -69,7 +68,7 @@ TEST(CircularBufferIntTest, insertNValues) {
 }
 
 TEST(CircularBufferIntTest, insertIterators) {
-    circular_buffer<int, true> cb(8); // {3, 1, 0, 2, 4}
+    circular_buffer<int, true> cb(8);  // {3, 1, 0, 2, 4}
     std::vector<int> v = {1, 2, 3, 4, 5};
     for (int i = 0; i < 5; ++i) {
         if (i % 2 == 0) {
@@ -84,7 +83,7 @@ TEST(CircularBufferIntTest, insertIterators) {
 }
 
 TEST(CircularBufferIntTest, insertInitializerList) {
-    circular_buffer<int, true> cb(8); // {3, 1, 0, 2, 4}
+    circular_buffer<int, true> cb(8);  // {3, 1, 0, 2, 4}
     for (int i = 0; i < 5; ++i) {
         if (i % 2 == 0) {
             cb.push_back(i);
@@ -124,38 +123,37 @@ TEST(ExtendableBufferTest, FrontBackAccess) {
     // {1,2}
     ASSERT_EQ(cb.front(), 1);
 
-    cb.pop_back(); 
+    cb.pop_back();
     // {1}
     ASSERT_EQ(cb.back(), 1);
 }
-
 
 TEST(ExtendableBufferTest, EraseElements) {
     circular_buffer<int, true> cb = {1, 2, 3, 4, 5};
 
     cb.erase(cb.begin() + 2);
-    ASSERT_THAT(cb, testing::ElementsAre(1,2,4,5));
+    ASSERT_THAT(cb, testing::ElementsAre(1, 2, 4, 5));
 
     cb.erase(cb.begin(), cb.begin() + 2);
-    ASSERT_THAT(cb, testing::ElementsAre(4,5));
+    ASSERT_THAT(cb, testing::ElementsAre(4, 5));
 }
 
 TEST(ExtendableBufferTest, AssignValues) {
     circular_buffer<int, true> cb(3);
 
     cb.assign(4, 7);
-    ASSERT_THAT(cb, testing::ElementsAre(7,7,7,7));
+    ASSERT_THAT(cb, testing::ElementsAre(7, 7, 7, 7));
 
-    std::vector<int> v = {1,2,3,4};
+    std::vector<int> v = {1, 2, 3, 4};
     cb.assign(v.begin() + 1, v.end() - 1);
-    ASSERT_THAT(cb, testing::ElementsAre(2,3));
+    ASSERT_THAT(cb, testing::ElementsAre(2, 3));
 
-    cb.assign({5,6,7});
-    ASSERT_THAT(cb, testing::ElementsAre(5,6,7));
+    cb.assign({5, 6, 7});
+    ASSERT_THAT(cb, testing::ElementsAre(5, 6, 7));
 }
 
 TEST(ExtendableBufferTest, ClearBufferThenPushBack) {
-    circular_buffer<int, true> cb = {1,2,3};
+    circular_buffer<int, true> cb = {1, 2, 3};
     cb.clear();
     ASSERT_TRUE(cb.empty());
     ASSERT_EQ(cb.size(), 0);
@@ -174,5 +172,5 @@ TEST(ExtendableBufferTest, WrapAround) {
     cb.push_back(4);
     cb.push_front(0);
 
-    ASSERT_THAT(cb, testing::ElementsAre(0,1,2,3,4));
+    ASSERT_THAT(cb, testing::ElementsAre(0, 1, 2, 3, 4));
 }

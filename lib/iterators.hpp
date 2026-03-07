@@ -57,17 +57,15 @@ class ContainerIterator {
     reference operator*() const;
 };
 
-template <typename T, bool IsConst=false>
+template <typename T, bool IsConst = false>
 class repeat_iterator {
    public:
     using iterator_category = std::forward_iterator_tag;
     using reference = std::conditional<IsConst, const T&, T&>::type;
     using pointer = std::conditional<IsConst, const T*, T*>::type;
     using value_type = T;
-    using difference_type =
-        int64_t;
-    using size_type =
-        size_t;
+    using difference_type = int64_t;
+    using size_type = size_t;
 
    private:
     reference value_{};

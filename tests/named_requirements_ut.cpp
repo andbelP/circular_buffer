@@ -1,9 +1,9 @@
 #include <circular_buffer.h>
 #include <gtest/gtest.h>
+
 #include <iterator>
 
-
-template<typename T>
+template <typename T>
 concept Container = requires(T a, const T b) {
     typename T::value_type;
     typename T::reference;
@@ -25,7 +25,6 @@ concept Container = requires(T a, const T b) {
     { a == b } -> std::same_as<bool>;
     { a != b } -> std::same_as<bool>;
 
-
     requires std::copy_constructible<T>;
     requires std::swappable<T>;
     requires std::default_initializable<T>;
@@ -34,10 +33,9 @@ concept Container = requires(T a, const T b) {
     requires std::assignable_from<T&, const T>;
 };
 
-
-
-template<typename T>
-concept AllocatorAwareContainer = requires(T a, typename T::allocator_type alloc) {
+template <typename T>
+concept AllocatorAwareContainer = requires(T a,
+                                           typename T::allocator_type alloc) {
     typename T::allocator_type;
 
     requires std::constructible_from<T, typename T::allocator_type>;
@@ -46,14 +44,15 @@ concept AllocatorAwareContainer = requires(T a, typename T::allocator_type alloc
     { a.get_allocator() } -> std::same_as<typename T::allocator_type>;
 };
 
-
-template<typename T>
-concept SequenceContainer = requires(T a, const T b, typename T::value_type value) {
-
-    requires std::constructible_from<T, typename T::size_type, typename T::value_type>;
-    requires std::constructible_from<T, typename std::initializer_list<typename T::value_type>>;
-    requires std::assignable_from<T&, typename std::initializer_list<typename T::value_type>>;
-
+template <typename T>
+concept SequenceContainer = requires(T a, const T b,
+                                     typename T::value_type value) {
+    requires std::constructible_from<T, typename T::size_type,
+                                     typename T::value_type>;
+    requires std::constructible_from<
+        T, typename std::initializer_list<typename T::value_type>>;
+    requires std::assignable_from<
+        T&, typename std::initializer_list<typename T::value_type>>;
 
     { a.front() } -> std::same_as<typename T::reference>;
     { b.front() } -> std::same_as<typename T::const_reference>;
@@ -66,8 +65,8 @@ concept SequenceContainer = requires(T a, const T b, typename T::value_type valu
     { a.pop_front() } -> std::same_as<void>;
     { a.pop_back() } -> std::same_as<void>;
 
-
-    requires requires(typename T::const_iterator pos, const T::const_iterator pos2, typename T::size_type n) {
+    requires requires(typename T::const_iterator pos,
+                      const T::const_iterator pos2, typename T::size_type n) {
         { a.insert(pos, value) } -> std::same_as<typename T::iterator>;
         { a.insert(pos, n, value) } -> std::same_as<typename T::iterator>;
         { a.erase(pos) } -> std::same_as<typename T::iterator>;
@@ -76,12 +75,10 @@ concept SequenceContainer = requires(T a, const T b, typename T::value_type valu
     };
 };
 
-
-template<typename T>
+template <typename T>
 concept ReversibleContainer = requires(T a, const T b) {
     typename T::reverse_iterator;
     typename T::const_reverse_iterator;
-
 
     { a.rbegin() } -> std::same_as<typename T::reverse_iterator>;
     { a.rend() } -> std::same_as<typename T::reverse_iterator>;
@@ -91,21 +88,17 @@ concept ReversibleContainer = requires(T a, const T b) {
     { a.crend() } -> std::same_as<typename T::const_reverse_iterator>;
 };
 
-
 TEST(NamedRequirements, Container) {
     static_assert(Container<circular_buffer<int>>);
 }
-
 
 TEST(NamedRequirements, AllocatorAwareContainer) {
     static_assert(AllocatorAwareContainer<circular_buffer<int>>);
 }
 
-
 TEST(NamedRequirements, SequenceContainer) {
     static_assert(SequenceContainer<circular_buffer<int>>);
 }
-
 
 TEST(NamedRequirements, ReversibleContainer) {
     static_assert(ReversibleContainer<circular_buffer<int>>);

@@ -38,8 +38,7 @@ circular_buffer<T, Extendable, Allocator>::circular_buffer(
     std::initializer_list<T> elements) {
     data_ = std::allocator_traits<Allocator>::allocate(alloc_, elements.size());
     for (auto it = elements.begin(); it != elements.end(); it++) {
-        std::allocator_traits<Allocator>::construct(alloc_, data_ + end_,
-                                                    *it);
+        std::allocator_traits<Allocator>::construct(alloc_, data_ + end_, *it);
         end_++;
     }
     size_ = elements.size();
@@ -50,7 +49,8 @@ circular_buffer<T, Extendable, Allocator>::circular_buffer(
 template <typename T, bool Extendable, typename Allocator>
 circular_buffer<T, Extendable, Allocator>::circular_buffer(
     const circular_buffer& other)
-    : alloc_(std::allocator_traits<Allocator>::select_on_container_copy_construction(other.alloc_)) {
+    : alloc_(std::allocator_traits<
+             Allocator>::select_on_container_copy_construction(other.alloc_)) {
     data_ = std::allocator_traits<Allocator>::allocate(alloc_, other.capacity_);
     for (auto it = other.begin(); it != other.end(); it++) {
         std::allocator_traits<Allocator>::construct(alloc_, data_ + end_, *it);
@@ -71,8 +71,7 @@ circular_buffer<T, Extendable, Allocator>::circular_buffer(
     end_ = other.end_;
 
     other.data_ = nullptr;
-    other.size_ = other.capacity_ = other.start_ =
-        other.end_ = 0;
+    other.size_ = other.capacity_ = other.start_ = other.end_ = 0;
 }
 
 template <typename T, bool Extendable, typename Allocator>
@@ -103,138 +102,151 @@ circular_buffer<T, Extendable, Allocator>::circular_buffer(
 }
 
 template <typename T, bool Extendable, typename Allocator>
-circular_buffer<T,Extendable, Allocator>& circular_buffer<T, Extendable, Allocator>::operator=(const circular_buffer& other){
-    if(this==&other){
+circular_buffer<T, Extendable, Allocator>&
+circular_buffer<T, Extendable, Allocator>::operator=(
+    const circular_buffer& other) {
+    if (this == &other) {
         return *this;
     }
 
-    if constexpr(std::allocator_traits<Allocator>::propagate_on_container_copy_assignment::value){
-        if(alloc_!=other.alloc_){
+    if constexpr (std::allocator_traits<Allocator>::
+                      propagate_on_container_copy_assignment::value) {
+        if (alloc_ != other.alloc_) {
             T* new_data;
-            size_type i=0;
-            try{
-                new_data = std::allocator_traits<Allocator>::allocate(other.alloc_, other.capacity_);
-                for(;i < other.size_; i++){
-                    std::allocator_traits<Allocator>::construct(other.alloc_,new_data+i,other.data_[(other.start_+i)%other.capacity_]);
+            size_type i = 0;
+            try {
+                new_data = std::allocator_traits<Allocator>::allocate(
+                    other.alloc_, other.capacity_);
+                for (; i < other.size_; i++) {
+                    std::allocator_traits<Allocator>::construct(
+                        other.alloc_, new_data + i,
+                        other.data_[(other.start_ + i) % other.capacity_]);
                 }
-            }
-            catch(...){
-                for(size_type j = 0; j < i; j++){
-                    std::allocator_traits<Allocator>::destroy(other.alloc_, new_data+j);
+            } catch (...) {
+                for (size_type j = 0; j < i; j++) {
+                    std::allocator_traits<Allocator>::destroy(other.alloc_,
+                                                              new_data + j);
                 }
-                std::allocator_traits<Allocator>::deallocate(other.alloc_, new_data, other.capacity_);
+                std::allocator_traits<Allocator>::deallocate(
+                    other.alloc_, new_data, other.capacity_);
                 throw;
             }
 
-            for(auto it = begin(); it!=end(); it++){
+            for (auto it = begin(); it != end(); it++) {
                 std::allocator_traits<Allocator>::destroy(alloc_, &(*it));
             }
-            std::allocator_traits<Allocator>::deallocate(alloc_, data_, capacity_);
-            data_=new_data;
-            alloc_=other.alloc_;
-            size_=other.size_;
-            capacity_=other.capacity_;
-            start_=0;
-            end_=size_;
-        }
-        else{
-            if(size_>=other.size_){
-                for(size_type i = 0; i < other.size_; i++){
-                    data_[(start_+i)%capacity_]=other[(other.start_+i)%other.capacity_];
+            std::allocator_traits<Allocator>::deallocate(alloc_, data_,
+                                                         capacity_);
+            data_ = new_data;
+            alloc_ = other.alloc_;
+            size_ = other.size_;
+            capacity_ = other.capacity_;
+            start_ = 0;
+            end_ = size_;
+        } else {
+            if (size_ >= other.size_) {
+                for (size_type i = 0; i < other.size_; i++) {
+                    data_[(start_ + i) % capacity_] =
+                        other[(other.start_ + i) % other.capacity_];
                 }
-                for(size_type i = other.size_; i < size_; i++){
-                    std::allocator_traits<Allocator>::destroy(alloc_,data_ + (start_+i)%capacity_);
+                for (size_type i = other.size_; i < size_; i++) {
+                    std::allocator_traits<Allocator>::destroy(
+                        alloc_, data_ + (start_ + i) % capacity_);
                 }
-                size_=other.size_;
-                end_=(start_+size_)%capacity_;
-            }
-            else{
-                while(capacity_<other.capacity_){
+                size_ = other.size_;
+                end_ = (start_ + size_) % capacity_;
+            } else {
+                while (capacity_ < other.capacity_) {
                     Extend();
                 }
-                for(auto it = begin(); it!=end(); it++){
+                for (auto it = begin(); it != end(); it++) {
                     std::allocator_traits<Allocator>::destroy(alloc_, &(*it));
                 }
-                for(size_type i = 0; i < other.size_; i++){
-                    std::allocator_traits<Allocator>::construct(alloc_, &data_[(start_+i)%capacity_], other[(other.start_+i)%other.capacity_]);
+                for (size_type i = 0; i < other.size_; i++) {
+                    std::allocator_traits<Allocator>::construct(
+                        alloc_, &data_[(start_ + i) % capacity_],
+                        other[(other.start_ + i) % other.capacity_]);
                 }
-                size_=other.size_;
-                end_=(start_+size_)%capacity_;
+                size_ = other.size_;
+                end_ = (start_ + size_) % capacity_;
             }
         }
-    }
-    else{
-        while(capacity_<other.capacity_){
+    } else {
+        while (capacity_ < other.capacity_) {
             Extend();
         }
-        for(auto it = begin(); it!=end(); it++){
+        for (auto it = begin(); it != end(); it++) {
             std::allocator_traits<Allocator>::destroy(alloc_, &(*it));
         }
-        for(size_type i = 0; i < other.size_; i++){
-            std::allocator_traits<Allocator>::construct(alloc_, &data_[(start_+i)%capacity_], other[(other.start_+i)%other.capacity_]);
+        for (size_type i = 0; i < other.size_; i++) {
+            std::allocator_traits<Allocator>::construct(
+                alloc_, &data_[(start_ + i) % capacity_],
+                other[(other.start_ + i) % other.capacity_]);
         }
-        size_=other.size_;
-        end_=(start_+size_)%capacity_;
+        size_ = other.size_;
+        end_ = (start_ + size_) % capacity_;
     }
 }
 
 template <typename T, bool Extendable, typename Allocator>
-circular_buffer<T,Extendable, Allocator>& circular_buffer<T, Extendable, Allocator>::operator=(circular_buffer&& other){
-    if(this==&other){
+circular_buffer<T, Extendable, Allocator>&
+circular_buffer<T, Extendable, Allocator>::operator=(circular_buffer&& other) {
+    if (this == &other) {
         return *this;
     }
 
-    if constexpr (std::allocator_traits<Allocator>::propagate_on_container_move_assignment::value) {
-
-        for(auto it = begin(); it!=end(); it++){
+    if constexpr (std::allocator_traits<Allocator>::
+                      propagate_on_container_move_assignment::value) {
+        for (auto it = begin(); it != end(); it++) {
             std::allocator_traits<Allocator>::destroy(alloc_, &(*it));
         }
         std::allocator_traits<Allocator>::deallocate(alloc_, data_, capacity_);
 
         alloc_ = std::move(other.alloc_);
-        data_=other.data_;
-        capacity_=other.capacity_;
-        size_=other.size_;
-        start_=other.start_;
-        end_=other.end_;
+        data_ = other.data_;
+        capacity_ = other.capacity_;
+        size_ = other.size_;
+        start_ = other.start_;
+        end_ = other.end_;
 
-        other.end_=other.start_=other.size_=other.capacity_=0;
-        other.data_=nullptr;
-    }
-    else if(alloc_ == other.alloc_){
-        for(auto it = begin(); it!=end(); it++){
+        other.end_ = other.start_ = other.size_ = other.capacity_ = 0;
+        other.data_ = nullptr;
+    } else if (alloc_ == other.alloc_) {
+        for (auto it = begin(); it != end(); it++) {
             std::allocator_traits<Allocator>::destroy(alloc_, &(*it));
         }
         std::allocator_traits<Allocator>::deallocate(alloc_, data_, capacity_);
 
-        data_=other.data_;
-        capacity_=other.capacity_;
-        size_=other.size_;
-        start_=other.start_;
-        end_=other.end_;
+        data_ = other.data_;
+        capacity_ = other.capacity_;
+        size_ = other.size_;
+        start_ = other.start_;
+        end_ = other.end_;
 
-        other.end_=other.start_=other.size_=other.capacity_=0;
-        other.data_=nullptr;
-    }
-    else{
+        other.end_ = other.start_ = other.size_ = other.capacity_ = 0;
+        other.data_ = nullptr;
+    } else {
         for (auto it = begin(); it != end(); it++) {
             std::allocator_traits<Allocator>::destroy(alloc_, &(*it));
         }
-        start_=end_=0;
-        if(capacity_ < other.capacity_){
-            if(data_!=nullptr){
-                std::allocator_traits<Allocator>::deallocate(alloc_, data_, capacity_);
+        start_ = end_ = 0;
+        if (capacity_ < other.capacity_) {
+            if (data_ != nullptr) {
+                std::allocator_traits<Allocator>::deallocate(alloc_, data_,
+                                                             capacity_);
             }
-            data_ = std::allocator_traits<Allocator>::allocate(alloc_, other.capacity_);
+            data_ = std::allocator_traits<Allocator>::allocate(alloc_,
+                                                               other.capacity_);
             capacity_ = other.capacity_;
         }
 
         for (auto it = other.begin(); it != other.end(); it++) {
-            std::allocator_traits<Allocator>::construct(alloc_, data_ + end_, std::move(*it));
+            std::allocator_traits<Allocator>::construct(alloc_, data_ + end_,
+                                                        std::move(*it));
             end_++;
         }
         size_ = other.size_;
-    }   
+    }
 
     return *this;
 }
@@ -248,7 +260,7 @@ circular_buffer<T, Extendable, Allocator>::circular_buffer(size_type n,
         std::allocator_traits<Allocator>::construct(alloc_, data_ + i, value);
     }
     end_ = n;
-    size_=n;
+    size_ = n;
 }
 
 template <typename T, bool Extendable, typename Allocator>
@@ -276,8 +288,8 @@ void circular_buffer<T, Extendable, Allocator>::push_back(U&& element) {
         }
     }
 
-    std::allocator_traits<Allocator>::construct(alloc_, data_ + end_%capacity_,
-                                                std::forward<U>(element));
+    std::allocator_traits<Allocator>::construct(
+        alloc_, data_ + end_ % capacity_, std::forward<U>(element));
     size_++;
     end_ = (end_ + 1) % capacity_;
 }
@@ -374,7 +386,6 @@ auto circular_buffer<T, Extendable, Allocator>::back() -> reference {
     return *(end() - 1);
 }
 
-
 template <typename T, bool Extendable, typename Allocator>
 auto circular_buffer<T, Extendable, Allocator>::begin() -> iterator {
     return iterator(this, 0);
@@ -445,73 +456,73 @@ template <typename T, bool Extendable, typename Allocator>
 template <typename ForwardIterator, bool>
 auto circular_buffer<T, Extendable, Allocator>::insert(const_iterator it,
                                                        ForwardIterator from,
-                                                       ForwardIterator to) -> iterator
-{
-    size_type n = std::distance(from,to);
-    if(n==0){
+                                                       ForwardIterator to)
+    -> iterator {
+    size_type n = std::distance(from, to);
+    if (n == 0) {
         return iterator{this, it.index_};
     }
     if constexpr (Extendable) {
-        while(size_+n>capacity_){
+        while (size_ + n > capacity_) {
             Extend();
         }
 
-        for(size_type i = size_; i < size_+n; i++){
-            std::allocator_traits<Allocator>::construct(alloc_, data_+(start_+i)%capacity_);
+        for (size_type i = size_; i < size_ + n; i++) {
+            std::allocator_traits<Allocator>::construct(
+                alloc_, data_ + (start_ + i) % capacity_);
         }
 
-
-        for(size_type i = size_; i >it.index_; i--){
-            size_type from_ind = (start_ + i-1) % capacity_;
-            size_type to_ind = (start_ + i + n-1) % capacity_;
-            data_[to_ind]=std::move(data_[from_ind]);
+        for (size_type i = size_; i > it.index_; i--) {
+            size_type from_ind = (start_ + i - 1) % capacity_;
+            size_type to_ind = (start_ + i + n - 1) % capacity_;
+            data_[to_ind] = std::move(data_[from_ind]);
         }
-        iterator ret_it{this,it.index_};
+        iterator ret_it{this, it.index_};
         size_type ind = it.index_;
-        size_+=n;
-        for(;from!=to;from++,it++){
-            data_[(start_+it.index_)%capacity_]=*from;
+        size_ += n;
+        for (; from != to; from++, it++) {
+            data_[(start_ + it.index_) % capacity_] = *from;
         }
-        end_=(start_+size_)%capacity_;
+        end_ = (start_ + size_) % capacity_;
         return ret_it;
-    }
-    else{
-        if(size_+n<=capacity_){
-            for(size_type i = size_; i < size_+n; i++){
-                std::allocator_traits<Allocator>::construct(alloc_, data_+(start_+i)%capacity_);
+    } else {
+        if (size_ + n <= capacity_) {
+            for (size_type i = size_; i < size_ + n; i++) {
+                std::allocator_traits<Allocator>::construct(
+                    alloc_, data_ + (start_ + i) % capacity_);
             }
 
-
-            for(size_type i = size_; i >it.index_; i--){
-                size_type from_ind = (start_ + i-1) % capacity_;
-                size_type to_ind = (start_ + i + n-1) % capacity_;
-                data_[to_ind]=std::move(data_[from_ind]);
+            for (size_type i = size_; i > it.index_; i--) {
+                size_type from_ind = (start_ + i - 1) % capacity_;
+                size_type to_ind = (start_ + i + n - 1) % capacity_;
+                data_[to_ind] = std::move(data_[from_ind]);
             }
-            iterator ret_it{this,it.index_};
+            iterator ret_it{this, it.index_};
             size_type ind = it.index_;
-            size_+=n;
-            for(;from!=to;from++,it++){
-                data_[(start_+it.index_)%capacity_]=*from;
+            size_ += n;
+            for (; from != to; from++, it++) {
+                data_[(start_ + it.index_) % capacity_] = *from;
             }
-            end_=(start_+size_)%capacity_;
+            end_ = (start_ + size_) % capacity_;
 
             return ret_it;
-        }
-        else{
-            circular_buffer tmp(size_+n);
-            tmp.assign(begin(),end());
-            tmp.insert(tmp.begin()+it.index_,from,to);
-            for(auto it = begin(); it!=end(); it++){
+        } else {
+            circular_buffer tmp(size_ + n);
+            tmp.assign(begin(), end());
+            tmp.insert(tmp.begin() + it.index_, from, to);
+            for (auto it = begin(); it != end(); it++) {
                 std::allocator_traits<Allocator>::destroy(alloc_, &(*it));
             }
             size_type ind = capacity_;
-            for(auto it = tmp.rbegin(); it!=tmp.rend() && ind > 0; it++,ind--){
-                std::allocator_traits<Allocator>::construct(alloc_, data_+ind-1, std::move(*it));
+            for (auto it = tmp.rbegin(); it != tmp.rend() && ind > 0;
+                 it++, ind--) {
+                std::allocator_traits<Allocator>::construct(
+                    alloc_, data_ + ind - 1, std::move(*it));
             }
-            size_=capacity_;
-            start_=0;
-            end_=size_;
-            return begin()+it.index_;
+            size_ = capacity_;
+            start_ = 0;
+            end_ = size_;
+            return begin() + it.index_;
         }
     }
 }
@@ -520,8 +531,8 @@ template <typename T, bool Extendable, typename Allocator>
 auto circular_buffer<T, Extendable, Allocator>::insert(const_iterator it,
                                                        const value_type& val)
     -> iterator {
-        value_type other=val;
-    return insert(it, &other, &other+1);
+    value_type other = val;
+    return insert(it, &other, &other + 1);
 }
 
 template <typename T, bool Extendable, typename Allocator>
@@ -529,9 +540,8 @@ auto circular_buffer<T, Extendable, Allocator>::insert(const_iterator it,
                                                        size_type cnt,
                                                        const value_type& val)
     -> iterator {
-    
-    repeat_iterator<T,true> first(val, 0);
-    repeat_iterator<T,true> last(val, cnt);
+    repeat_iterator<T, true> first(val, 0);
+    repeat_iterator<T, true> last(val, cnt);
 
     return insert(it, first, last);
 }
@@ -539,7 +549,7 @@ auto circular_buffer<T, Extendable, Allocator>::insert(const_iterator it,
 template <typename T, bool Extendable, typename Allocator>
 auto circular_buffer<T, Extendable, Allocator>::insert(
     const_iterator it, std::initializer_list<T> elements) -> iterator {
-    return insert(it,elements.begin(),elements.end());
+    return insert(it, elements.begin(), elements.end());
 }
 
 template <typename T, bool Extendable, typename Allocator>
@@ -712,20 +722,21 @@ void circular_buffer<T, Extendable, Allocator>::resize(size_type n,
 }
 
 template <typename T, bool Extendable, typename Allocator>
-circular_buffer<T, Extendable, Allocator>::~circular_buffer(){
-    for(auto it = begin(); it!=end(); it++){
+circular_buffer<T, Extendable, Allocator>::~circular_buffer() {
+    for (auto it = begin(); it != end(); it++) {
         std::allocator_traits<Allocator>::destroy(alloc_, &(*it));
     }
     std::allocator_traits<Allocator>::deallocate(alloc_, data_, capacity_);
 }
 
-
 template <typename T, bool Extendable, typename Allocator>
-auto circular_buffer<T, Extendable, Allocator>::operator[](size_type index) -> reference{
-        return data_[(start_+index)%capacity_];
+auto circular_buffer<T, Extendable, Allocator>::operator[](size_type index)
+    -> reference {
+    return data_[(start_ + index) % capacity_];
 }
 
 template <typename T, bool Extendable, typename Allocator>
-auto circular_buffer<T, Extendable, Allocator>::operator[](size_type index) const -> const_reference{
-        return data_[(start_+index)%capacity_];
+auto circular_buffer<T, Extendable, Allocator>::operator[](
+    size_type index) const -> const_reference {
+    return data_[(start_ + index) % capacity_];
 }

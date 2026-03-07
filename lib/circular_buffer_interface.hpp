@@ -136,5 +136,3 @@ class circular_buffer {
     reference operator[](size_type ind);
     const_reference operator[](size_type ind) const;
 };
-
-// TODO: operators[]. 
