@@ -1,39 +1,31 @@
 #include <circular_buffer.h>
-
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
+#include <concepts>
 #include <cstdlib>
+#include <iostream>
 
 class NodeTag {};
 
 class SomeObj {
-public:
+   public:
     static inline int ConstructorCalled = 0;
     static inline int DestructorCalled = 0;
 
-    SomeObj() {
-        ++ConstructorCalled;
-    }
+    SomeObj() { ++ConstructorCalled; }
 
-    ~SomeObj() {
-        ++DestructorCalled;
-    }
+    ~SomeObj() { ++DestructorCalled; }
 };
 
-
-template<class Alloc>
-concept AllocatorRequirements = requires(Alloc alloc, std::size_t n)
-{
+template <class Alloc>
+concept AllocatorRequirements = requires(Alloc alloc, std::size_t n) {
     { *alloc.allocate(n) } -> std::same_as<typename Alloc::value_type&>;
     { alloc.deallocate(alloc.allocate(n), n) };
-} && std::copy_constructible<Alloc>
-  && std::equality_comparable<Alloc>;
+} && std::copy_constructible<Alloc> && std::equality_comparable<Alloc>;
 
-
-template<typename T>
+template <typename T>
 class TestAllocator {
-public:
+   public:
     using value_type = T;
     using pointer = T*;
     using size_type = size_t;
@@ -44,9 +36,8 @@ public:
 
     TestAllocator() = default;
 
-    template<typename U>
-    TestAllocator(const TestAllocator<U>& other) {
-    }
+    template <typename U>
+    TestAllocator(const TestAllocator<U>& other) {}
 
     pointer allocate(size_type sz) {
         if constexpr (std::is_same_v<T, SomeObj>) {
@@ -59,21 +50,15 @@ public:
         return static_cast<pointer>(std::aligned_alloc(alignof(T), sizeof(T) * sz));
     }
 
-    void deallocate(pointer p, std::size_t) {
-        std::free(p);
-    }
+    void deallocate(pointer p, std::size_t) { std::free(p); }
 
-    bool operator==(const TestAllocator& other) const {
-        return true;
-    }
-
+    bool operator==(const TestAllocator& other) const { return true; }
 };
-
 
 static_assert(AllocatorRequirements<TestAllocator<SomeObj>>);
 
 class WorkWithAllocatorTest : public testing::Test {
-public:
+   public:
     void SetUp() override {
         SomeObj::ConstructorCalled = 0;
         SomeObj::DestructorCalled = 0;
@@ -84,7 +69,6 @@ public:
         TestAllocator<NodeTag>::AllocationCount = 0;
         TestAllocator<NodeTag>::ElementsAllocated = 0;
     }
-
 };
 
 /*
@@ -95,7 +79,8 @@ public:
 */
 TEST_F(WorkWithAllocatorTest, reserve) {
     TestAllocator<SomeObj> allocator;
-    circular_buffer<SomeObj, false, TestAllocator<SomeObj>> buffer(5, allocator);
+    circular_buffer<SomeObj, false, TestAllocator<SomeObj>> buffer(5,
+                                                                   allocator);
 
     ASSERT_EQ(TestAllocator<SomeObj>::AllocationCount, 1);
     ASSERT_EQ(TestAllocator<SomeObj>::ElementsAllocated, 5);
@@ -105,7 +90,8 @@ TEST_F(WorkWithAllocatorTest, reserve) {
 }
 
 /*
-    В тесте задаётся Capacity = 5, Extended = false, а далее добавляется 5 элементов.
+    В тесте задаётся Capacity = 5, Extended = false, а далее добавляется 5
+   элементов.
 
     Ожидается, что будет:
         1. 1 аллокация буфера
@@ -113,7 +99,8 @@ TEST_F(WorkWithAllocatorTest, reserve) {
 */
 TEST_F(WorkWithAllocatorTest, simplePushBack) {
     TestAllocator<SomeObj> allocator;
-    circular_buffer<SomeObj, false, TestAllocator<SomeObj>> buffer(5, allocator);
+    circular_buffer<SomeObj, false, TestAllocator<SomeObj>> buffer(5,
+                                                                   allocator);
     for (int i = 0; i < 5; ++i) {
         buffer.push_back(SomeObj{});
     }
@@ -126,7 +113,8 @@ TEST_F(WorkWithAllocatorTest, simplePushBack) {
 }
 
 /*
-    В тесте задаётся Capacity = 5, Extended = true, а далее добавляется 6 элементов.
+    В тесте задаётся Capacity = 5, Extended = true, а далее добавляется 6
+   элементов.
 
     Ожидается, что будет:
         1. 2 аллокации буфера
@@ -143,10 +131,9 @@ TEST_F(WorkWithAllocatorTest, extendedPushBack) {
     ASSERT_EQ(TestAllocator<SomeObj>::AllocationCount, 2);
     ASSERT_EQ(TestAllocator<SomeObj>::ElementsAllocated, 15);
 
-    std::cout<< "DFD"<<SomeObj::ConstructorCalled << "DFD" << SomeObj::DestructorCalled<< "DFD";
+    std::cout << "DFD" << SomeObj::ConstructorCalled << "DFD"
+              << SomeObj::DestructorCalled << "DFD";
     ASSERT_EQ(SomeObj::ConstructorCalled, 6);
     ASSERT_EQ(SomeObj::DestructorCalled, 11);
-
-    
 }
 #endif

@@ -1,7 +1,5 @@
 #include <circular_buffer.h>
-
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
 struct NoDefaultConstructible {
     NoDefaultConstructible() = delete;
@@ -10,7 +8,8 @@ struct NoDefaultConstructible {
 };
 
 /*
-    Тест проверяет, что ваш контейнер умеет работать с типами, у которых нет конструктора по-умолчанию
+    Тест проверяет, что ваш контейнер умеет работать с типами, у которых нет
+   конструктора по-умолчанию
 */
 TEST(NoDefaultConstructible, canConstruct) {
     circular_buffer<NoDefaultConstructible> buffer(1);

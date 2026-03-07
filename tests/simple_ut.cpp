@@ -2,7 +2,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <cstdint>
 #include <string>
+#include <utility>
 #include <vector>
 
 template <typename T>
