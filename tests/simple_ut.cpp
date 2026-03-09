@@ -3,23 +3,23 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
-#include <cstdint>
 #include <string>
+#include <cstddef>
 #include <utility>
 #include <vector>
 
 template <typename T>
 class circular_buffer_int_test : public testing::Test {};
 
-using CircularBufferIntTypes = testing::Types<circular_buffer<int, false>>;
-TYPED_TEST_SUITE(circular_buffer_int_test, CircularBufferIntTypes);
+using circular_buffer_int_types = testing::Types<circular_buffer<int, false>>;
+TYPED_TEST_SUITE(circular_buffer_int_test, circular_buffer_int_types);
 
 template <typename T>
 class circular_buffer_string_test : public testing::Test {};
 
-using CircularBufferStringTypes =
+using circular_buffer_string_types =
     testing::Types<circular_buffer<std::string, false>>;
-TYPED_TEST_SUITE(circular_buffer_string_test, CircularBufferStringTypes);
+TYPED_TEST_SUITE(circular_buffer_string_test, circular_buffer_string_types);
 
 TYPED_TEST(circular_buffer_int_test, alternatingPush) {
     TypeParam cb(6);

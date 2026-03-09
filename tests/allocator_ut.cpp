@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdlib>
+#include <type_traits>
 #include <concepts>
 #include <iostream>
 
@@ -73,7 +74,7 @@ public:
 
 static_assert(AllocatorRequirements<test_allocator<some_obj>>);
 
-class WorkWithAllocatorTest : public testing::Test {
+class work_with_allocator_test : public testing::Test {
 public:
     void SetUp() override {
         some_obj::constructor_called = 0;
@@ -94,7 +95,7 @@ public:
     Ожидается, что будет:
         1. 1 аллокация буфера
 */
-TEST_F(WorkWithAllocatorTest, reserve) {
+TEST_F(work_with_allocator_test, reserve) {
     test_allocator<some_obj> allocator;
     circular_buffer<some_obj, false, test_allocator<some_obj>> buffer(5, allocator);
 
@@ -112,7 +113,7 @@ TEST_F(WorkWithAllocatorTest, reserve) {
         1. 1 аллокация буфера
         2. 5 конструкторов и деструкторов у SomeObj
 */
-TEST_F(WorkWithAllocatorTest, simplePushBack) {
+TEST_F(work_with_allocator_test, simplePushBack) {
     test_allocator<some_obj> allocator;
     circular_buffer<some_obj, false, test_allocator<some_obj>> buffer(5, allocator);
     for (int i = 0; i < 5; ++i) {
@@ -134,7 +135,7 @@ TEST_F(WorkWithAllocatorTest, simplePushBack) {
         2. 6 конструкторов и деструкторов у some_obj
 */
 #ifdef RUN_EXT_TESTS
-TEST_F(WorkWithAllocatorTest, extendedPushBack) {
+TEST_F(work_with_allocator_test, extendedPushBack) {
     test_allocator<some_obj> allocator;
     circular_buffer<some_obj, true, test_allocator<some_obj>> buffer(5, allocator);
     for (int i = 0; i < 6; ++i) {
