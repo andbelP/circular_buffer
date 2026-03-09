@@ -1,74 +1,91 @@
 #include <circular_buffer.h>
+
 #include <gtest/gtest.h>
 
-#include <concepts>
 #include <cstdlib>
+#include <concepts>
 #include <iostream>
 
-class NodeTag {};
+class node_tag {};
 
-class SomeObj {
-   public:
-    static inline int ConstructorCalled = 0;
-    static inline int DestructorCalled = 0;
+class some_obj {
+public:
+    static inline int constructor_called = 0;
+    static inline int destructor_called = 0;
 
-    SomeObj() { ++ConstructorCalled; }
+    some_obj() {
+        ++constructor_called;
+    }
 
-    ~SomeObj() { ++DestructorCalled; }
+    ~some_obj() {
+        ++destructor_called;
+    }
 };
 
-template <class Alloc>
-concept AllocatorRequirements = requires(Alloc alloc, std::size_t n) {
+
+template<class Alloc>
+concept AllocatorRequirements = requires(Alloc alloc, std::size_t n)
+{
     { *alloc.allocate(n) } -> std::same_as<typename Alloc::value_type&>;
     { alloc.deallocate(alloc.allocate(n), n) };
-} && std::copy_constructible<Alloc> && std::equality_comparable<Alloc>;
+} && std::copy_constructible<Alloc>
+  && std::equality_comparable<Alloc>;
 
-template <typename T>
-class TestAllocator {
-   public:
+
+template<typename T>
+class test_allocator {
+public:
     using value_type = T;
     using pointer = T*;
     using size_type = size_t;
     using is_always_equal = std::true_type;
 
-    static inline int AllocationCount = 0;
-    static inline int ElementsAllocated = 0;
+    static inline int allocation_count = 0;
+    static inline int elements_allocated = 0;
 
-    TestAllocator() = default;
+    test_allocator() = default;
 
-    template <typename U>
-    TestAllocator(const TestAllocator<U>& other) {}
+    template<typename U>
+    test_allocator(const test_allocator<U>& other) {
+    }
 
     pointer allocate(size_type sz) {
-        if constexpr (std::is_same_v<T, SomeObj>) {
-            ++TestAllocator<SomeObj>::AllocationCount;
-            TestAllocator<SomeObj>::ElementsAllocated += sz;
+        if constexpr (std::is_same_v<T, some_obj>) {
+            ++test_allocator<some_obj>::allocation_count;
+            test_allocator<some_obj>::elements_allocated += sz;
         } else {
-            ++TestAllocator<NodeTag>::AllocationCount;
-            TestAllocator<NodeTag>::ElementsAllocated += sz;
+            ++test_allocator<node_tag>::allocation_count;
+            test_allocator<node_tag>::elements_allocated += sz;
         }
         return static_cast<pointer>(std::aligned_alloc(alignof(T), sizeof(T) * sz));
     }
 
-    void deallocate(pointer p, std::size_t) { std::free(p); }
+    void deallocate(pointer p, std::size_t) {
+        std::free(p);
+    }
 
-    bool operator==(const TestAllocator& other) const { return true; }
+    bool operator==(const test_allocator& other) const {
+        return true;
+    }
+
 };
 
-static_assert(AllocatorRequirements<TestAllocator<SomeObj>>);
+
+static_assert(AllocatorRequirements<test_allocator<some_obj>>);
 
 class WorkWithAllocatorTest : public testing::Test {
-   public:
+public:
     void SetUp() override {
-        SomeObj::ConstructorCalled = 0;
-        SomeObj::DestructorCalled = 0;
+        some_obj::constructor_called = 0;
+        some_obj::destructor_called = 0;
 
-        TestAllocator<SomeObj>::AllocationCount = 0;
-        TestAllocator<SomeObj>::ElementsAllocated = 0;
+        test_allocator<some_obj>::allocation_count = 0;
+        test_allocator<some_obj>::elements_allocated = 0;
 
-        TestAllocator<NodeTag>::AllocationCount = 0;
-        TestAllocator<NodeTag>::ElementsAllocated = 0;
+        test_allocator<node_tag>::allocation_count = 0;
+        test_allocator<node_tag>::elements_allocated = 0;
     }
+
 };
 
 /*
@@ -78,62 +95,59 @@ class WorkWithAllocatorTest : public testing::Test {
         1. 1 аллокация буфера
 */
 TEST_F(WorkWithAllocatorTest, reserve) {
-    TestAllocator<SomeObj> allocator;
-    circular_buffer<SomeObj, false, TestAllocator<SomeObj>> buffer(5,
-                                                                   allocator);
+    test_allocator<some_obj> allocator;
+    circular_buffer<some_obj, false, test_allocator<some_obj>> buffer(5, allocator);
 
-    ASSERT_EQ(TestAllocator<SomeObj>::AllocationCount, 1);
-    ASSERT_EQ(TestAllocator<SomeObj>::ElementsAllocated, 5);
+    ASSERT_EQ(test_allocator<some_obj>::allocation_count, 1);
+    ASSERT_EQ(test_allocator<some_obj>::elements_allocated, 5);
 
-    ASSERT_EQ(SomeObj::ConstructorCalled, 0);
-    ASSERT_EQ(SomeObj::DestructorCalled, 0);
+    ASSERT_EQ(some_obj::constructor_called, 0);
+    ASSERT_EQ(some_obj::destructor_called, 0);
 }
 
 /*
-    В тесте задаётся Capacity = 5, Extended = false, а далее добавляется 5
-   элементов.
+    В тесте задаётся Capacity = 5, Extended = false, а далее добавляется 5 элементов.
 
     Ожидается, что будет:
         1. 1 аллокация буфера
         2. 5 конструкторов и деструкторов у SomeObj
 */
 TEST_F(WorkWithAllocatorTest, simplePushBack) {
-    TestAllocator<SomeObj> allocator;
-    circular_buffer<SomeObj, false, TestAllocator<SomeObj>> buffer(5,
-                                                                   allocator);
+    test_allocator<some_obj> allocator;
+    circular_buffer<some_obj, false, test_allocator<some_obj>> buffer(5, allocator);
     for (int i = 0; i < 5; ++i) {
-        buffer.push_back(SomeObj{});
+        buffer.push_back(some_obj{});
     }
 
-    ASSERT_EQ(TestAllocator<SomeObj>::AllocationCount, 1);
-    ASSERT_EQ(TestAllocator<SomeObj>::ElementsAllocated, 5);
+    ASSERT_EQ(test_allocator<some_obj>::allocation_count, 1);
+    ASSERT_EQ(test_allocator<some_obj>::elements_allocated, 5);
 
-    ASSERT_EQ(SomeObj::ConstructorCalled, 5);
-    ASSERT_EQ(SomeObj::DestructorCalled, 5);
+    ASSERT_EQ(some_obj::constructor_called, 5);
+    ASSERT_EQ(some_obj::destructor_called, 5);
 }
 
 /*
-    В тесте задаётся Capacity = 5, Extended = true, а далее добавляется 6
-   элементов.
+    В тесте задаётся Capacity = 5, Extended = true, а далее добавляется 6 элементов.
 
     Ожидается, что будет:
         1. 2 аллокации буфера
-        2. 6 конструкторов и деструкторов у SomeObj
+        2. 6 конструкторов и деструкторов у some_obj
 */
 #ifdef RUN_EXT_TESTS
 TEST_F(WorkWithAllocatorTest, extendedPushBack) {
-    TestAllocator<SomeObj> allocator;
-    circular_buffer<SomeObj, true, TestAllocator<SomeObj>> buffer(5, allocator);
+    test_allocator<some_obj> allocator;
+    circular_buffer<some_obj, true, test_allocator<some_obj>> buffer(5, allocator);
     for (int i = 0; i < 6; ++i) {
-        buffer.push_back(SomeObj{});
+        buffer.push_back(some_obj{});
     }
 
-    ASSERT_EQ(TestAllocator<SomeObj>::AllocationCount, 2);
-    ASSERT_EQ(TestAllocator<SomeObj>::ElementsAllocated, 15);
+    ASSERT_EQ(test_allocator<some_obj>::allocation_count, 2);
+    ASSERT_EQ(test_allocator<some_obj>::elements_allocated, 15);
 
-    std::cout << "DFD" << SomeObj::ConstructorCalled << "DFD"
-              << SomeObj::DestructorCalled << "DFD";
-    ASSERT_EQ(SomeObj::ConstructorCalled, 6);
-    ASSERT_EQ(SomeObj::DestructorCalled, 11);
+    std::cout<< "DFD"<<some_obj::constructor_called << "DFD" << some_obj::destructor_called<< "DFD";
+    ASSERT_EQ(some_obj::constructor_called, 6);
+    ASSERT_EQ(some_obj::destructor_called, 11);
+
+    
 }
 #endif

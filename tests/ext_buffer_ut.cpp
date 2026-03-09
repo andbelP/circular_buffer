@@ -1,6 +1,7 @@
 #include <circular_buffer.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <vector>
 
 TEST(ExtendableBufferTest, simpleTest) {
     circular_buffer<int, true> cb(5);

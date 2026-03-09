@@ -6,17 +6,17 @@ template <typename T, bool Extendable = false,
           typename Allocator = std::allocator<T>>
 class circular_buffer {
    public:
-    friend ContainerIterator<T, Extendable, Allocator, false>;
-    friend ContainerIterator<T, Extendable, Allocator, true>;
+    friend container_iterator<T, Extendable, Allocator, false>;
+    friend container_iterator<T, Extendable, Allocator, true>;
 
     using value_type = T;
     using reference = T&;
     using const_reference = const T&;
     using size_type = typename std::allocator_traits<Allocator>::size_type;
-    using iterator = ContainerIterator<T, Extendable, Allocator, false>;
-    using const_iterator = ContainerIterator<T, Extendable, Allocator, true>;
-    using reverse_iterator = ReverseIterator<iterator>;
-    using const_reverse_iterator = ReverseIterator<const_iterator>;
+    using iterator = container_iterator<T, Extendable, Allocator, false>;
+    using const_iterator = container_iterator<T, Extendable, Allocator, true>;
+    using reverse_iterator = reverse_iterator_adapter<iterator>;
+    using const_reverse_iterator = reverse_iterator_adapter<const_iterator>;
     using difference_type = std::allocator_traits<Allocator>::difference_type;
     using allocator_type = Allocator;
 
@@ -30,7 +30,7 @@ class circular_buffer {
     size_type start_{};
     size_type end_{};
 
-    void Extend();
+    void extend();
 
    public:
     circular_buffer() = default;

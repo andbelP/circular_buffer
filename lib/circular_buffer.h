@@ -1,7 +1,7 @@
 #include "circular_buffer_interface.hpp"
 
 template <typename T, bool Extendable, typename Allocator>
-void circular_buffer<T, Extendable, Allocator>::Extend() {
+void circular_buffer<T, Extendable, Allocator>::extend() {
     if (capacity_ == 0) {
         data_ = std::allocator_traits<Allocator>::allocate(alloc_, 5);
         capacity_ = 5;
@@ -157,7 +157,7 @@ circular_buffer<T, Extendable, Allocator>::operator=(
                 end_ = (start_ + size_) % capacity_;
             } else {
                 while (capacity_ < other.capacity_) {
-                    Extend();
+                    extend();
                 }
                 for (auto it = begin(); it != end(); it++) {
                     std::allocator_traits<Allocator>::destroy(alloc_, &(*it));
@@ -173,7 +173,7 @@ circular_buffer<T, Extendable, Allocator>::operator=(
         }
     } else {
         while (capacity_ < other.capacity_) {
-            Extend();
+            extend();
         }
         for (auto it = begin(); it != end(); it++) {
             std::allocator_traits<Allocator>::destroy(alloc_, &(*it));
@@ -278,7 +278,7 @@ template <typename U>
 void circular_buffer<T, Extendable, Allocator>::push_back(U&& element) {
     if constexpr (Extendable) {
         if (size_ == capacity_) {
-            Extend();
+            extend();
         }
     } else {
         if (size_ == capacity_) {
@@ -299,7 +299,7 @@ template <typename U>
 void circular_buffer<T, Extendable, Allocator>::push_front(U&& element) {
     if constexpr (Extendable) {
         if (size_ == capacity_) {
-            Extend();
+            extend();
         }
     } else {
         if (size_ == capacity_) {
@@ -464,7 +464,7 @@ auto circular_buffer<T, Extendable, Allocator>::insert(const_iterator it,
     }
     if constexpr (Extendable) {
         while (size_ + n > capacity_) {
-            Extend();
+            extend();
         }
 
         for (size_type i = size_; i < size_ + n; i++) {
@@ -599,7 +599,7 @@ void circular_buffer<T, Extendable, Allocator>::assign(size_type n,
                                                        const T& value) {
     if constexpr (Extendable) {
         while (capacity_ < n) {
-            Extend();
+            extend();
         }
     } else {
         n = (capacity_ < n) ? capacity_ : n;
@@ -623,7 +623,7 @@ void circular_buffer<T, Extendable, Allocator>::assign(
     size_type n = elements.size();
     if constexpr (Extendable) {
         while (capacity_ < n) {
-            Extend();
+            extend();
         }
     } else {
         n = (capacity_ < n) ? capacity_ : n;
@@ -651,7 +651,7 @@ void circular_buffer<T, Extendable, Allocator>::assign(ForwardIterator from,
     }
     if constexpr (Extendable) {
         while (capacity_ < n) {
-            Extend();
+            extend();
         }
     } else {
         n = (capacity_ < n) ? capacity_ : n;
@@ -674,7 +674,7 @@ template <typename T, bool Extendable, typename Allocator>
 void circular_buffer<T, Extendable, Allocator>::resize(size_type n) {
     if constexpr (Extendable) {
         while (n > capacity_) {
-            Extend();
+            extend();
         }
     } else {
         n = (n > capacity_ ? capacity_ : n);
@@ -700,7 +700,7 @@ void circular_buffer<T, Extendable, Allocator>::resize(size_type n,
                                                        const T& val) {
     if constexpr (Extendable) {
         while (n > capacity_) {
-            Extend();
+            extend();
         }
     } else {
         n = (n > capacity_ ? capacity_ : n);
