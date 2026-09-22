@@ -1,53 +1,45 @@
-# Лабораторная работа 6
+# Circular Buffer (STL-Compatible Container)
 
-Circular Buffer. STL - совместивый контейнер.
+Personal project implementing an STL-compatible circular buffer (ring buffer) container.
 
-## Задача
+## Goal
 
-Реализовать STL-совместимый контейнер для [Циклического буфера](https://en.wikipedia.org/wiki/Circular_buffer). Для 1 и 2 потока с возможностью расширения.
+Implement an STL-compatible container for a [circular buffer](https://en.wikipedia.org/wiki/Circular_buffer). The container provides a configurable maximum size and optional capacity growth.
 
-## Требования
+## Requirements
 
-Контейнер должен представлять из себя шаблон класса, праметризируемый типом хранимых объектов и аллокатором, максимальное количество хранимых элементов передается в конструкторе. Также частично(см ниже) удовлетворять следующим требованиям к stl-совместимым контейнерам:
+The container is a class template parameterized by the stored value type and an allocator. The maximum number of stored elements is provided via the constructor. It partially satisfies the following standard named requirements for STL-compatible containers:
 
-  - [контейнер](https://en.cppreference.com/w/cpp/named_req/Container)
-  - [последовательный контейнер](https://en.cppreference.com/w/cpp/named_req/SequenceContainer) (за исключением следующих методов):
-     - ~~emplace~~
-     - ~~assign_range~~
-     - ~~emplace_front~~
-     - ~~emplace_back~~
-     - ~~prepend_range~~
-  - [контейнер с обратным итератором](https://en.cppreference.com/w/cpp/named_req/ReversibleContainer)
-  - [контейнер поддерживающий аллокатор](https://en.cppreference.com/w/cpp/named_req/AllocatorAwareContainer)
-  - [oбладать итератором произвольного доступа](https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator)
+- [Container](https://en.cppreference.com/w/cpp/named_req/Container)
+- [SequenceContainer](https://en.cppreference.com/w/cpp/named_req/SequenceContainer) with the following methods intentionally not provided:
+  - emplace
+  - assign_range
+  - emplace_front
+  - emplace_back
+  - prepend_range
+- [ReversibleContainer](https://en.cppreference.com/w/cpp/named_req/ReversibleContainer)
+- [AllocatorAwareContainer](https://en.cppreference.com/w/cpp/named_req/AllocatorAwareContainer)
+- Provides a [RandomAccessIterator](https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator)
 
+Additionally, the container provides the following operations with expected time complexity:
 
-Помимое этого обладать следующими методами:
+| Operation   | Complexity |
+|-------------|------------|
+| clear       | O(N)       |
+| push_back   | O(1)       |
+| pop_back    | O(1)       |
+| push_front  | O(1)       |
+| pop_front   | O(1)       |
+| insert      | O(N)       |
+| erase       | O(N)       |
 
-| Метод     |  Алгоримическая сложность        |
-| --------  | -------                          |
-| clear     |  O(N)                            |
-| push_back |  O(1)                            |
-| pop_back  |  O(1)                            |
-| push_front |  O(1)                            |
-| pop_front  |  O(1)                            |
-| insert     |  O(N)                            |
-| erase      |  O(N)                            |
+## Tests
 
+The above requirements are covered by tests using [Google Test](http://google.github.io/googletest).
 
-## Тесты
+### Local Coverage Check
 
-Все указанные выше требования должны быть покрыты тестами, с помощью фреймворка [Google Test](http://google.github.io/googletest).
-
-В этой лабораторной покрытие тестами является частью задания и измеряется при помощи CI/CD. Работы с покрытием ниже 50% считаются невыполненными.
-
-Подробный лог покрытия можно увидеть в `Quality -> Coverage -> Show coverage log`.
-
-Часть тестов предоставляется заранее.
-
-### Локальная проверка покрытия
-
-Проверить покрытие тестами также можно локально. Для этого необходимо установить утилиту `gcovr`, собрать проект с включенной проверкой покрытия, и запустить таргет `coverage`.
+You can measure test coverage locally. Install `gcovr`, build the project with coverage enabled, and run the `coverage` target:
 
 ```bash
 cmake -B build -DCMAKE_BUILD_TYPE=Debug -DWITH_COVERAGE=ON
@@ -55,35 +47,14 @@ cmake --build build
 cmake --build build --target coverage
 ```
 
-После выполнения, подробный отчёт будет доступен в `build/coverage.html`.
+After completion, a detailed report will be available at `build/coverage.html`.
 
-## Кольцевой буфер с расширением максимального размера (только для 1 и 2 потока)
+## Optional Capacity Growth
 
-В учебных целях, контейнер должен обладать функциональностью для расширения своего максимального размера.
-Должно быть реализовано следующее поведение: в случае достижения максимального размера кольцевого буфера, значение максимального размера должно удваиваться (по аналогии с вектором).
+The container can optionally grow its maximum size. When the buffer reaches its current capacity, the maximum size doubles (similar to `std::vector`).
 
-Для запуска тестов расширяемого буфера в [CMakeLists](tests/CMakeLists.txt) укажите для опции `RUN_EXT_TESTS` значение `ON`
+To enable tests for the expandable buffer, set `RUN_EXT_TESTS` to `ON` in `tests/CMakeLists.txt`.
 
-## Ограничения
+## Restrictions
 
-- Запрещено использовать стандартные контейнеры и адаптеры
-
-## ТеорМин
-
-* контейнеры
-* алгоритмы
-* аллокаторы
-* адаптеры
-
-
-## Deadline
-
-| deadline | date | coeff | branch |
-|----------|-----------------|-------|------------|
-| 0 | 09.03.26 23:59 | 1.0 | deadline_0 |
-| 1 | 16.03.26 23:59 | 0.8 | deadline_1 |
-| 2 | 23.03.26 23:59 | 0.65 | deadline_2 |
-| 3 | 30.03.26 00:00 | 0.5 | deadline_3 |
-
-
-Максимальное количество баллов - 12
+- Standard containers and adapters must not be used.
