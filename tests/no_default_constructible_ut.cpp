@@ -1,19 +1,18 @@
 #include <circular_buffer.h>
-
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
-struct NoDefaultConstructible {
-    NoDefaultConstructible() = delete;
+struct no_default_constructible {
+    no_default_constructible() = delete;
 
-    NoDefaultConstructible(int) {}
+    no_default_constructible(int) {}
 };
 
 /*
-    Тест проверяет, что ваш контейнер умеет работать с типами, у которых нет конструктора по-умолчанию
+    Тест проверяет, что ваш контейнер умеет работать с типами, у которых нет
+   конструктора по-умолчанию
 */
-TEST(NoDefaultConstructible, canConstruct) {
-    circular_buffer<NoDefaultConstructible> buffer(1);
-    buffer.push_back(NoDefaultConstructible(1));
+TEST(no_default_constructible, canConstruct) {
+    circular_buffer<no_default_constructible> buffer(1);
+    buffer.push_back(no_default_constructible(1));
     ASSERT_EQ(buffer.size(), 1);
 }
